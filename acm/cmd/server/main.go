@@ -7,15 +7,6 @@ import (
 	"net/http"
 )
 
-func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", homeHandler)
-	mux.HandleFunc("/about", aboutHandler)
-	mux.HandleFunc("/contact", contactHandler)
-
-	log.Println("Server started on http://localhost:8080")
-	http.ListenAndServe(":8080", mux)
-}
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("templates/home.html")
 	fmt.Println(tmpl)
@@ -44,4 +35,13 @@ func contactHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl.Execute(w, nil)
 	// w.Write([]byte("Contact Page"))
+}
+func main() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", homeHandler)
+	mux.HandleFunc("/about", aboutHandler)
+	mux.HandleFunc("/contact", contactHandler)
+
+	log.Println("Server started on http://localhost:8080")
+	http.ListenAndServe(":8080", mux)
 }
