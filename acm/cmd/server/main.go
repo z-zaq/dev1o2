@@ -21,7 +21,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "login.html")
 }
 func renderTemplate(w http.ResponseWriter, file string) {
-	tmpl, err := template.ParseFiles("/templates/base.html", "/templates/"+file,)
+	tmpl, err := template.ParseFiles("/templates/base.html", "/templates/"+file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -31,6 +31,8 @@ func renderTemplate(w http.ResponseWriter, file string) {
 
 func main() {
 	mux := http.NewServeMux()
+	fs := http.FileServer(http.Dir("static"))
+	mux.Handle("/static/", http.StripPrefix("/static", fs))
 	mux.HandleFunc("/", homeHandler)
 	mux.HandleFunc("/about", aboutHandler)
 	mux.HandleFunc("/contact", contactHandler)
