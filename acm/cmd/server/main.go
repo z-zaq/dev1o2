@@ -1,46 +1,40 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 )
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("templates/home.html")
-	fmt.Println(tmpl)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, nil)
-
+	renderTemplate(w, "home.html")
 }
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("about.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	tmpl.Execute(w, nil)
+	renderTemplate(w, "about.html")
 }
 
 // w.Write([]byte("About Page"))
 func contactHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("templates/contact.html")
+	renderTemplate(w, "contact.html")
+}
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "login.html")
+}
+func renderTemplate(w http.ResponseWriter, file string) {
+	tmpl, err := template.ParseFiles("/templates/base.html", "/templates/"+file,)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	tmpl.Execute(w, nil)
-	// w.Write([]byte("Contact Page"))
 }
+
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", homeHandler)
 	mux.HandleFunc("/about", aboutHandler)
 	mux.HandleFunc("/contact", contactHandler)
+	mux.HandleFunc("/login", loginHandler)
 
 	log.Println("Server started on http://localhost:8080")
 	http.ListenAndServe(":8080", mux)
