@@ -21,7 +21,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "login.html")
 }
 func renderTemplate(w http.ResponseWriter, file string) {
-	tmpl, err := template.ParseFiles("/templates/base.html", "/templates/"+file)
+	tmpl, err := template.ParseFiles("templates/base.html", "templates/"+file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
