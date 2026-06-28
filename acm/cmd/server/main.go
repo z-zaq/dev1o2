@@ -38,6 +38,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 func registerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
+		type User struct {
+			Name     string
+			Email    string
+			Password string
+		}
 		user := User{
 			Name:     r.FormValue("name"),
 			Email:    r.FormValue("email"),
