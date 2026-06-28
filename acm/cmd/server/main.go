@@ -17,9 +17,6 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 func contactHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "contact.html")
 }
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "login.html")
-}
 func renderTemplate(w http.ResponseWriter, file string) {
 	tmpl, err := template.ParseFiles("templates/base.html", "templates/"+file)
 	if err != nil {
@@ -27,6 +24,33 @@ func renderTemplate(w http.ResponseWriter, file string) {
 		return
 	}
 	tmpl.Execute(w, nil)
+}
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+		log.Println("Email:", email)
+		log.Println("Password:", password)
+		w.Write([]byte("Login form submitted"))
+		return
+	}
+	renderTemplate(w, "login.html")
+}
+func registerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		user := User{
+			Name:     r.FormValue("name"),
+			Email:    r.FormValue("email"),
+			Password: r.FormValue("password"),
+		}
+		log.Println("New User Registered:")
+		log.Println("Name:", user.Name)
+		log.Println("Name:", user.Email)
+		log.Println("Password:", user.Password)
+		w.Write([]byte("Registration Successful"))
+		return
+	}
+	renderTemplate(w, "register.html")
 }
 
 func main() {
@@ -37,6 +61,7 @@ func main() {
 	mux.HandleFunc("/about", aboutHandler)
 	mux.HandleFunc("/contact", contactHandler)
 	mux.HandleFunc("/login", loginHandler)
+	mux.HandleFunc("/register", registerHandler)
 
 	log.Println("Server started on http://localhost:8080")
 	http.ListenAndServe(":8080", mux)
