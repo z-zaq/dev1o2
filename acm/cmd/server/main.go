@@ -1,37 +1,13 @@
 package main
 
 import (
-	"html/template"
+	"acm/internal/models"
+	"acm/internal/validators"
+	"acm/internal/handlers"
 	"log"
 	"net/http"
-	"strings"
 )
 
-type User struct {
-	Name     string
-	Email    string
-	Password string
-}
-
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "home.html")
-}
-func aboutHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "about.html")
-}
-
-// w.Write([]byte("About Page"))
-func contactHandler(w http.ResponseWriter, r *http.Request) {
-	renderTemplate(w, "contact.html")
-}
-func renderTemplate(w http.ResponseWriter, file string) {
-	tmpl, err := template.ParseFiles("templates/base.html", "templates/"+file)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	tmpl.Execute(w, nil)
-}
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		email := r.FormValue("email")
@@ -41,19 +17,11 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Login form submitted"))
 		return
 	}
-	renderTemplate(w, "login.html")
-}
-func validateEmail(email string) bool {
-	return strings.Contains(email, "@") &&
-		strings.Contains(email, ".")
-}
-
-func validatePassword(password string) bool {
-	return len(password) >= 8
+	RenderTemplate(w, "login.html")
 }
 func registerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		user := User{
+		user := models.User{
 			Name:     r.FormValue("name"),
 			Email:    r.FormValue("email"),
 			Password: r.FormValue("password"),
@@ -70,11 +38,11 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Password is required", http.StatusBadRequest)
 			return
 		}
-		if !validateEmail(user.Email) {
+		if !validators.ValidateEmail(user.Email) {
 			http.Error(w, "invalid email address", http.StatusBadRequest)
 			return
 		}
-		if !validatePassword(user.Password) {
+		if !validators.ValidatePassword(user.Password) {
 			http.Error(w, "Password must be at least 8 characters", http.StatusBadRequest)
 			return
 		}
