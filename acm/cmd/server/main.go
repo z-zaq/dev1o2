@@ -4,7 +4,14 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 )
+
+type User struct {
+	Name     string
+	Email    string
+	Password string
+}
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "home.html")
@@ -36,24 +43,46 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	renderTemplate(w, "login.html")
 }
+func validateEmail(email string) bool {
+	return strings.Contains(email, "@") &&
+		strings.Contains(email, ".")
+}
+
+func validatePassword(password string) bool {
+	return len(password) >= 8
+}
 func registerHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		type User struct {
-			Name     string
-			Email    string
-			Password string
-		}
 		user := User{
 			Name:     r.FormValue("name"),
 			Email:    r.FormValue("email"),
 			Password: r.FormValue("password"),
 		}
+		if user.Name == "" {
+			http.Error(w, "Name is required", http.StatusBadRequest)
+			return
+		}
+		if user.Email == "" {
+			http.Error(w, "Email is required", http.StatusBadRequest)
+			return
+		}
+		if user.Password == "" {
+			http.Error(w, "Password is required", http.StatusBadRequest)
+			return
+		}
+		if !validateEmail(user.Email) {
+			http.Error(w, "invalid email address", http.StatusBadRequest)
+			return
+		}
+		if !validatePassword(user.Password) {
+			http.Error(w, "Password must be at least 8 characters", http.StatusBadRequest)
+			return
+		}
 		log.Println("New User Registered:")
 		log.Println("Name:", user.Name)
-		log.Println("Name:", user.Email)
+		log.Println("Email:", user.Email)
 		log.Println("Password:", user.Password)
-		w.Write([]byte("Registration Successful"))
-		return
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 	renderTemplate(w, "register.html")
 }
