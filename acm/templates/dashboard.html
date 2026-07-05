@@ -1,6 +1,7 @@
 {{define "content"}}
 <h1>Dashboard</h1>
 
-<p>Welcome to your account.</p>
-<p>You have successfully logged in.</p>
+<p>Welcome {{.Name}}</p>
+<p>Email: {{.Email}}</p>
+<a href="/logout">Logout</a>
 {{end}}

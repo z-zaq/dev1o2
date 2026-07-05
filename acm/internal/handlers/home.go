@@ -5,11 +5,11 @@ import (
 	"net/http"
 )
 func HomeHandler(w http.ResponseWriter, r*http.Request){
-	views.RenderTemplate(w, "home.html")
+	views.RenderTemplate(w, "home.html", nil)
 }
 func AboutHandler(w http.ResponseWriter, r*http.Request){
-	views.RenderTemplate(w, "about.html")
+	views.RenderTemplate(w, "about.html", nil)
 }
 func ContactHandler(w http.ResponseWriter, r*http.Request){
-	views.RenderTemplate(w, "contact.html")
+	views.RenderTemplate(w, "contact.html", nil)
 }

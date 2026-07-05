@@ -4,6 +4,8 @@ import (
 	"acm/internal/database"
 	"acm/internal/handlers"
 	"acm/internal/repository"
+
+	// "acm/internal/auth"
 	"log"
 	"net/http"
 )
@@ -17,8 +19,15 @@ func main() {
 		DB: db,
 		// handlers.UserRepo = userRepo
 	}
+	transactionRepo := &repository.TransactionRepository{
+		DB: db,
+	}
 	handlers.UserRepo = userRepo
 	err = userRepo.CreateTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = transactionRepo.CreateTable()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,6 +42,7 @@ func main() {
 	mux.HandleFunc("/login", handlers.LoginHandler)
 	mux.HandleFunc("/register", handlers.RegisterHandler)
 	mux.HandleFunc("/dashboard", handlers.DashboardHandler)
+	mux.HandleFunc("/logout", handlers.LogoutHandler)
 
 	log.Println("Server started on http://localhost:8080")
 	http.ListenAndServe(":8080", mux)
