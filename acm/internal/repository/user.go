@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"database/sql"
 	"acm/internal/models"
+	"database/sql"
 )
 
 type UserRepository struct {
@@ -19,7 +19,7 @@ func (r *UserRepository) CreateTable() error {
 	_, err := r.DB.Exec(query)
 	return err
 }
-func (r *UserRepository) CreateUser(user models.User) error{
+func (r *UserRepository) CreateUser(user models.User) error {
 	query := `
 	INSERT INTO users(name, email, password)
 	VALUES (?,?,?)`
@@ -30,4 +30,23 @@ func (r *UserRepository) CreateUser(user models.User) error{
 		user.Password,
 	)
 	return err
+}
+func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
+	query := `
+	SELECT id, name, email, password
+	FROM users
+	WHERE email = ?`
+
+	user := &models.User{}
+
+	err := r.DB.QueryRow(query, email).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
