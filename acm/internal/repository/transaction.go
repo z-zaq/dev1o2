@@ -66,3 +66,18 @@ func (r *TransactionRepository) GetTransactionsByUserID(
 	}
 	return transactions, nil
 }
+func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) {
+	query := `
+	SELECT COALESCE(SUM(amount), 0)
+	FROM transactions
+	WHERE user_id = ?
+	AND type = 'deposit'`
+
+	var balance float64
+
+	err := r.DB.QueryRow(query, userID).Scan(&balance)
+	if err != nil {
+		return 0, err
+	}
+	return balance, nil
+}

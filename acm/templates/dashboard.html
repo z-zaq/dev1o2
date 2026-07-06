@@ -1,9 +1,12 @@
 {{define "content"}}
 <h1>Dashboard</h1>
 
-<p>Welcome {{.Name}}</p>
-<p>Email: {{.Email}}</p>
+<p>Welcome {{.User.Name}}</p>
+<p>Email: {{.User.Email}}</p>
+
+<h3>Current Balance: ${{.Balance}}</h3>
+
 <p><a href="/deposit">Make Deposit</p>
-    <p><a href="/history">Transaction History</a></p>
-<a href="/logout">Logout</a>
+<p><a href="/history">Transaction History</a></p>
+<p><a href="/logout">Logout</a></p>
 {{end}}

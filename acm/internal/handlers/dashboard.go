@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"acm/internal/auth"
-	// "acm/internal/repository"
+	"acm/internal/models"
 	"acm/internal/views"
 	"net/http"
 )
@@ -23,5 +23,17 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
 	}
-	views.RenderTemplate(w, "dashboard.html", user)
+	balance, err := TransactionRepo.GetBalanceByUserID(user.ID)
+	if err != nil {
+		http.Error(w, "Failed to load balance", http.StatusInternalServerError)
+		return
+	}
+	data := struct {
+		User    *models.User
+		Balance float64
+	}{
+		User:    user,
+		Balance: balance,
+	}
+	views.RenderTemplate(w, "dashboard.html", data)
 }
