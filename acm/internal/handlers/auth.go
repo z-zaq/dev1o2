@@ -6,11 +6,13 @@ import (
 	"acm/internal/repository"
 	"acm/internal/validators"
 	"acm/internal/views"
+
 	// "log"
 	"net/http"
 )
 
 var UserRepo *repository.UserRepository
+var TransactionRepo *repository.TransactionRepository
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
