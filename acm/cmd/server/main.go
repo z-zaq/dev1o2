@@ -22,6 +22,7 @@ func main() {
 	transactionRepo := &repository.TransactionRepository{
 		DB: db,
 	}
+	handlers.TransactionRepo = transactionRepo
 	handlers.UserRepo = userRepo
 	err = userRepo.CreateTable()
 	if err != nil {
@@ -44,6 +45,7 @@ func main() {
 	mux.HandleFunc("/dashboard", handlers.DashboardHandler)
 	mux.HandleFunc("/logout", handlers.LogoutHandler)
 	mux.HandleFunc("/deposit", handlers.DepositHandler)
+	mux.HandleFunc("/history", handlers.HistoryHandler)
 
 	log.Println("Server started on http://localhost:8080")
 	http.ListenAndServe(":8080", mux)

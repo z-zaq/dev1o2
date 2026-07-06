@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"acm/internal/models"
 	"database/sql"
 )
 
@@ -18,4 +19,50 @@ func (r *TransactionRepository) CreateTable() error {
 	);`
 	_, err := r.DB.Exec(query)
 	return err
+}
+func (r *TransactionRepository) CreateTransaction(
+	transaction models.Transaction,
+) error {
+	query := `
+	INSERT INTO transactions(user_id, type, amount)
+	VALUES (?, ?, ?)`
+	_, err := r.DB.Exec(
+		query,
+		transaction.UserID,
+		transaction.Type,
+		transaction.Amount,
+	)
+	return err
+}
+func (r *TransactionRepository) GetTransactionsByUserID(
+	userID int,
+) ([]models.Transaction, error) {
+	query := `
+	SELECT id, user_id, type, amount
+	FROM transactions
+	WHERE user_id = ?`
+
+	rows, err := r.DB.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []models.Transaction
+
+	for rows.Next() {
+		var transaction models.Transaction
+
+		err := rows.Scan(
+			&transaction.ID,
+			&transaction.UserID,
+			&transaction.Type,
+			&transaction.Amount,
+		)
+		if err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, transaction)
+	}
+	return transactions, nil
 }
