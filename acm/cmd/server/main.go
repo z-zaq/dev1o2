@@ -45,6 +45,7 @@ func main() {
 	mux.HandleFunc("/dashboard", handlers.DashboardHandler)
 	mux.HandleFunc("/logout", handlers.LogoutHandler)
 	mux.HandleFunc("/deposit", handlers.DepositHandler)
+	mux.HandleFunc("/withdraw", handlers.WithdrawHandler)
 	mux.HandleFunc("/history", handlers.HistoryHandler)
 
 	log.Println("Server started on http://localhost:8080")
