@@ -68,10 +68,14 @@ func (r *TransactionRepository) GetTransactionsByUserID(
 }
 func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) {
 	query := `
-	SELECT COALESCE(SUM(amount), 0)
+	SELECT COALESCE(SUM(CASE 
+	WHEN type = 'deposit' THEN amount
+	WHEN type = 'deposit' THEN -amount
+	ELSE 0
+	END), 0)
 	FROM transactions
 	WHERE user_id = ?
-	AND type = 'deposit'`
+	`
 
 	var balance float64
 
