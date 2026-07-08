@@ -78,7 +78,8 @@ func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) 
 	query := `
 	SELECT COALESCE(SUM(CASE 
 	WHEN type = 'deposit' THEN amount
-	WHEN type = 'withdraw' THEN -amount
+	WHEN type = 'withdrawal' THEN -amount
+	WHEN type = 'transfer_out' THEN -amount
 	ELSE 0
 	END), 0)
 	FROM transactions

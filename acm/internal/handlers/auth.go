@@ -61,9 +61,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		// log.Println("New User Registered:")
-		// log.Println("Name:", user.Name)
-		// log.Println("Email:", user.Email)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 	views.RenderTemplate(w, "register.html", nil)
