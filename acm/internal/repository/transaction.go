@@ -85,3 +85,31 @@ func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) 
 	}
 	return balance, nil
 }
+func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, error){
+	rows, err := r.DB.Query(`
+	SELECT id, user_id, type, amount
+	FROM transactions
+	ORDER BY id DESC
+	`)
+	if err != nil{
+		return nil, err
+	}
+	defer rows.Close()
+
+	var transactions []models.Transaction
+
+	for rows.Next() {
+		var t models.Transaction
+		err := rows.Scan(
+			&t.ID,
+			&t.UserID,
+			&t.Type,
+			&t.Amount,
+		)
+		if err != nil{
+			return nil, err
+		}
+		transactions = append(transactions, t)
+	}
+	return transactions, nil
+}

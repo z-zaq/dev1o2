@@ -3,6 +3,7 @@ package repository
 import (
 	"acm/internal/models"
 	"database/sql"
+	// "golang.org/x/tools/go/analysis/passes/nilfunc"
 )
 
 type UserRepository struct {
@@ -49,4 +50,30 @@ func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+func (r *UserRepository) GetAllUsers() ([]models.User, error) {
+	rows, err := r.DB.Query(`
+	SELECT id, name, email
+	FROM users
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+
+		err := rows.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Email,
+		)
+		if err != nil {
+			return users, nil
+		}
+		users = append(users, user)
+	}
+	return users, nil
 }
