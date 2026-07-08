@@ -16,7 +16,15 @@ func (r *TransactionRepository) CreateTable() error {
 		user_id INTEGER NOT NULL,
 		type TEXT NOT NULL,
 		amount REAL NOT NULL
-	);`
+	)`
+	// query := `
+	// CREATE TABLE IF NOT EXISTS transactions (
+	// 	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	// 	name TEXT NOT NULL,
+	// 	email TEXT UNIQUE NOT NULL,
+	// 	password TEXT NOT NULL,
+	// 	is_admin BOOLEAN DEFAULT FALSE
+	// )`
 	_, err := r.DB.Exec(query)
 	return err
 }
@@ -70,7 +78,7 @@ func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) 
 	query := `
 	SELECT COALESCE(SUM(CASE 
 	WHEN type = 'deposit' THEN amount
-	WHEN type = 'deposit' THEN -amount
+	WHEN type = 'withdraw' THEN -amount
 	ELSE 0
 	END), 0)
 	FROM transactions
@@ -85,13 +93,13 @@ func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) 
 	}
 	return balance, nil
 }
-func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, error){
+func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, error) {
 	rows, err := r.DB.Query(`
 	SELECT id, user_id, type, amount
 	FROM transactions
 	ORDER BY id DESC
 	`)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -106,7 +114,7 @@ func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, erro
 			&t.Type,
 			&t.Amount,
 		)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 		transactions = append(transactions, t)

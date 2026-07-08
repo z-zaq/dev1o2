@@ -15,26 +15,28 @@ func (r *UserRepository) CreateTable() error {
 	CREATE TABLE IF NOT EXISTS users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL,
-	email TEXT NOT NULL UNIQUE,
-	password TEXT NOT NULL);`
+	email TEXT UNIQUE NOT NULL,
+	password TEXT NOT NULL,
+	is_admin BOOLEAN DEFAULT FALSE)`
 	_, err := r.DB.Exec(query)
 	return err
 }
 func (r *UserRepository) CreateUser(user models.User) error {
 	query := `
-	INSERT INTO users(name, email, password)
-	VALUES (?,?,?)`
+	INSERT INTO users(name, email, password, is_admin)
+	VALUES (?,?,?,?)`
 	_, err := r.DB.Exec(
 		query,
 		user.Name,
 		user.Email,
 		user.Password,
+		user.IsAdmin,
 	)
 	return err
 }
 func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	query := `
-	SELECT id, name, email, password
+	SELECT id, name, email, password, is_admin
 	FROM users
 	WHERE email = ?`
 
@@ -45,6 +47,7 @@ func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 		&user.Name,
 		&user.Email,
 		&user.Password,
+		&user.IsAdmin,
 	)
 	if err != nil {
 		return nil, err

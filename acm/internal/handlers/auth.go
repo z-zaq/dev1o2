@@ -20,6 +20,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			Name:     r.FormValue("name"),
 			Email:    r.FormValue("email"),
 			Password: r.FormValue("password"),
+			IsAdmin:  false,
+		}
+		if user.Email == "admin@acm.com" {
+			user.IsAdmin = true
 		}
 		if user.Name == "" {
 			http.Error(w, "Name is required", http.StatusBadRequest)
