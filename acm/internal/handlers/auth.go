@@ -7,6 +7,8 @@ import (
 	"acm/internal/validators"
 	"acm/internal/views"
 
+	"golang.org/x/crypto/bcrypt"
+
 	// "log"
 	"net/http"
 )
@@ -45,7 +47,16 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Password must be at least 8 characters", http.StatusBadRequest)
 			return
 		}
-		err := UserRepo.CreateUser(user)
+		hashedPassword, err := bcrypt.GenerateFromPassword(
+			[]byte(user.Password),
+			bcrypt.DefaultCost,
+		)
+		if err != nil {
+			http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+			return
+		}
+		user.Password = string(hashedPassword)
+		err = UserRepo.CreateUser(user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -67,10 +78,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		if user.Password != password {
+		err = bcrypt.CompareHashAndPassword(
+			[]byte(user.Password),
+			[]byte(password),
+		)
+		if err != nil {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
+		// if user.Password != password {
+		// 	http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		// 	return
+		// }
 		sessionID := auth.GenerateSessionID()
 		auth.Sessions[sessionID] = user.Email
 

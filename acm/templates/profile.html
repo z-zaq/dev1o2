@@ -1,0 +1,16 @@
+{{define "content"}}
+
+<h1>Profile</h1>
+
+<p>Name: {{.User.Name}}</p>
+<p>Email: {{.User.Email}}</p>
+
+<h2>Account Statistics</h2>
+<a href="/profile">Profile</a>
+
+<p>Balance: {{.Balance}}</p>
+<p>Total Deposits: {{.DepositCount}}</p>
+<p>Total Withdrawals: {{.WithdrawalCount}}</p>
+<p>Total Transactions: {{.TransactionCount}}</p>
+
+{{end}}
