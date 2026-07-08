@@ -42,6 +42,9 @@ func (r *TransactionRepository) CreateTransaction(
 	)
 	return err
 }
+
+// tx, err := r.DB.Begin()
+
 func (r *TransactionRepository) GetTransactionsByUserID(
 	userID int,
 ) ([]models.Transaction, error) {
@@ -78,6 +81,7 @@ func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) 
 	query := `
 	SELECT COALESCE(SUM(CASE 
 	WHEN type = 'deposit' THEN amount
+	WHEN type = 'transfer_in' THEN amount
 	WHEN type = 'withdrawal' THEN -amount
 	WHEN type = 'transfer_out' THEN -amount
 	ELSE 0
@@ -121,4 +125,29 @@ func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, erro
 		transactions = append(transactions, t)
 	}
 	return transactions, nil
+}
+func (r *TransactionRepository) Transfer(
+	senderID int,
+	receiverID int,
+	amount float64,
+) error {
+
+	tx, err := r.DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	// sender transaction
+
+	// if sender insert fails:
+	// tx.Rollback()
+	// return err
+
+	// receiver transaction
+
+	// if receiver insert fails:
+	// tx.Rollback()
+	// return err
+
+	return tx.Commit()
 }
