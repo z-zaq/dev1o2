@@ -137,17 +137,29 @@ func (r *TransactionRepository) Transfer(
 		return err
 	}
 
-	// sender transaction
+	_, err = tx.Exec(
+		`INSERT INTO transactions(user_id, type, amount)
+		 VALUES (?, ?, ?)`,
+		senderID,
+		"transfer_out",
+		amount,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
-	// if sender insert fails:
-	// tx.Rollback()
-	// return err
-
-	// receiver transaction
-
-	// if receiver insert fails:
-	// tx.Rollback()
-	// return err
+	_, err = tx.Exec(
+		`INSERT INTO transactions(user_id, type, amount)
+		 VALUES (?, ?, ?)`,
+		receiverID,
+		"transfer_in",
+		amount,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
 	return tx.Commit()
 }

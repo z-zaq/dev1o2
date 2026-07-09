@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"acm/internal/auth"
-	"acm/internal/models"
 	"acm/internal/views"
 	"net/http"
 	"strconv"
@@ -53,23 +52,21 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Insufficient funds", http.StatusBadRequest)
 			return
 		}
-		senderTx := models.Transaction{
-			UserID: user.ID,
-			Type:   "transfer_out",
-			Amount: amount,
-		}
-		receiverTx := models.Transaction{
-			UserID: recipient.ID,
-			Type:   "transfer_in",
-			Amount: amount,
-		}
-		err = TransactionRepo.CreateTransaction(senderTx)
-		if err != nil {
-			http.Error(w, "Transfer failed", http.StatusInternalServerError)
-			return
-		}
-
-		err = TransactionRepo.CreateTransaction(receiverTx)
+		// senderTx := models.Transaction{
+		// 	UserID: user.ID,
+		// 	Type:   "transfer_out",
+		// 	Amount: amount,
+		// }
+		// receiverTx := models.Transaction{
+		// 	UserID: recipient.ID,
+		// 	Type:   "transfer_in",
+		// 	Amount: amount,
+		// }
+		err = TransactionRepo.Transfer(
+			user.ID,
+			recipient.ID,
+			amount,
+		)
 		if err != nil {
 			http.Error(w, "Transfer failed", http.StatusInternalServerError)
 			return
