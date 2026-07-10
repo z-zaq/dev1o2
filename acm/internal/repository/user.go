@@ -80,3 +80,19 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	}
 	return users, nil
 }
+func (r *UserRepository) UpdateUser(user models.User) error {
+	query := `
+	UPDATE users
+	SET name = ?, email = ?
+	WHERE id = ?
+	`
+
+	_, err := r.DB.Exec(
+		query,
+		user.Name,
+		user.Email,
+		user.ID,
+	)
+
+	return err
+}

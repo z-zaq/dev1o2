@@ -1,0 +1,19 @@
+{{define "content"}}
+
+<h1>Edit Profile</h1>
+
+<form method="POST" action="/profile/edit">
+
+    <label>Name:</label>
+    <input type="text" name="name" value="{{.Name}}" required>
+
+    <br><br>
+
+    <label>Email:</label>
+    <input type="email" name="email" value="{{.Email}}" required>
+
+    <br><br>
+
+    <button type="submit">Save Changes</button>
+</form>
+{{end}}
