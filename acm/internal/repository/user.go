@@ -96,3 +96,12 @@ func (r *UserRepository) UpdateUser(user models.User) error {
 
 	return err
 }
+func (r *UserRepository) DeleteUser(userID int) error {
+	query := `
+	DELETE FROM users
+	WHERE id = ?
+	`
+
+	_, err := r.DB.Exec(query, userID)
+	return err
+}
