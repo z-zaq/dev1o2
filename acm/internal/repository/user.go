@@ -105,3 +105,23 @@ func (r *UserRepository) DeleteUser(userID int) error {
 	_, err := r.DB.Exec(query, userID)
 	return err
 }
+func (r *UserRepository) UpdatePassword(
+	userID int,
+	hashedPassword string,
+) error {
+
+	query := `
+	UPDATE users
+	SET password = ?
+	WHERE id = ?
+	`
+
+	_, err := r.DB.Exec(
+		query,
+		hashedPassword,
+		userID,
+	)
+
+	return err
+}
+

@@ -52,6 +52,7 @@ func main() {
 	mux.HandleFunc("/transfer", handlers.TransferHandler)
 	mux.HandleFunc("/profile/edit", handlers.EditProfileHandler)
 	mux.HandleFunc("/delete-account", handlers.DeleteAccountHandler)
+	mux.HandleFunc("/change-password", handlers.ChangePasswordHandler)
 
 	log.Println("Server started on http://localhost:8080")
 	http.ListenAndServe(":8080", mux)

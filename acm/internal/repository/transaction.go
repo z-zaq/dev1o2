@@ -3,6 +3,7 @@ package repository
 import (
 	"acm/internal/models"
 	"database/sql"
+	"time"
 )
 
 type TransactionRepository struct {
@@ -12,19 +13,12 @@ type TransactionRepository struct {
 func (r *TransactionRepository) CreateTable() error {
 	query := `
 	CREATE TABLE IF NOT EXISTS transactions (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id INTEGER NOT NULL,
-		type TEXT NOT NULL,
-		amount REAL NOT NULL
-	)`
-	// query := `
-	// CREATE TABLE IF NOT EXISTS transactions (
-	// 	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	// 	name TEXT NOT NULL,
-	// 	email TEXT UNIQUE NOT NULL,
-	// 	password TEXT NOT NULL,
-	// 	is_admin BOOLEAN DEFAULT FALSE
-	// )`
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    amount REAL NOT NULL,
+    created_at DATETIME NOT NULL
+)`
 	_, err := r.DB.Exec(query)
 	return err
 }
@@ -32,13 +26,14 @@ func (r *TransactionRepository) CreateTransaction(
 	transaction models.Transaction,
 ) error {
 	query := `
-	INSERT INTO transactions(user_id, type, amount)
-	VALUES (?, ?, ?)`
+	INSERT INTO transactions(user_id, type, amount, created_at)
+	VALUES (?, ?, ?, ?)`
 	_, err := r.DB.Exec(
 		query,
 		transaction.UserID,
 		transaction.Type,
 		transaction.Amount,
+		time.Now(),
 	)
 	return err
 }

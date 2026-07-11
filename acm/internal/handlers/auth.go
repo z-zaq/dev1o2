@@ -72,7 +72,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		user, err := UserRepo.GetUserByEmail(email)
 		if err != nil {
-			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		err = bcrypt.CompareHashAndPassword(
@@ -80,7 +80,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			[]byte(password),
 		)
 		if err != nil {
-			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		// if user.Password != password {
