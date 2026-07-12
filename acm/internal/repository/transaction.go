@@ -46,7 +46,8 @@ func (r *TransactionRepository) GetTransactionsByUserID(
 	query := `
 	SELECT id, user_id, type, amount
 	FROM transactions
-	WHERE user_id = ?`
+	WHERE user_id = ?
+	ORDER BY created_at DESC`
 
 	rows, err := r.DB.Query(query, userID)
 	if err != nil {
@@ -64,6 +65,7 @@ func (r *TransactionRepository) GetTransactionsByUserID(
 			&transaction.UserID,
 			&transaction.Type,
 			&transaction.Amount,
+			&transaction.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -95,7 +97,7 @@ func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) 
 }
 func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, error) {
 	rows, err := r.DB.Query(`
-	SELECT id, user_id, type, amount
+	SELECT id, user_id, type, amount, created_at
 	FROM transactions
 	ORDER BY id DESC
 	`)
@@ -133,11 +135,12 @@ func (r *TransactionRepository) Transfer(
 	}
 
 	_, err = tx.Exec(
-		`INSERT INTO transactions(user_id, type, amount)
-		 VALUES (?, ?, ?)`,
+		`INSERT INTO transactions(user_id, type, amount, created_at)
+		 VALUES (?, ?, ?, ?)`,
 		senderID,
 		"transfer_out",
 		amount,
+		time.Now(),
 	)
 	if err != nil {
 		tx.Rollback()
@@ -145,11 +148,12 @@ func (r *TransactionRepository) Transfer(
 	}
 
 	_, err = tx.Exec(
-		`INSERT INTO transactions(user_id, type, amount)
-		 VALUES (?, ?, ?)`,
+		`INSERT INTO transactions(user_id, type, amount, created_at)
+		 VALUES (?, ?, ?, ?)`,
 		receiverID,
 		"transfer_in",
 		amount,
+		time.Now(),
 	)
 	if err != nil {
 		tx.Rollback()

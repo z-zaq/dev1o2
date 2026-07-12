@@ -52,23 +52,13 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Insufficient funds", http.StatusBadRequest)
 			return
 		}
-		// senderTx := models.Transaction{
-		// 	UserID: user.ID,
-		// 	Type:   "transfer_out",
-		// 	Amount: amount,
-		// }
-		// receiverTx := models.Transaction{
-		// 	UserID: recipient.ID,
-		// 	Type:   "transfer_in",
-		// 	Amount: amount,
-		// }
 		err = TransactionRepo.Transfer(
 			user.ID,
 			recipient.ID,
 			amount,
 		)
 		if err != nil {
-			http.Error(w, "Transfer failed", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)

@@ -27,6 +27,7 @@
         <th>User ID</th>
         <th>Type</th>
         <th>Amount</th>
+        <th>Date & Time</th>
     </tr>
 
     {{range .Transactions}}
@@ -35,6 +36,7 @@
         <td>{{.UserID}}</td>
         <td>{{.Type}}</td>
         <td>{{.Amount}}</td>
+        <td>{{.CreatedAt}}</td>
     </tr>
     {{end}}
 
