@@ -6,6 +6,7 @@ import (
 	"acm/internal/views"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func WithdrawHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +48,11 @@ func WithdrawHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		transaction := models.Transaction{
-			UserID: user.ID,
-			Type:   "withdrawal",
-			Amount: amount,
+			UserID:      user.ID,
+			Type:        "withdrawal",
+			Amount:      amount,
+			Description: "Withdrawal",
+			CreatedAt:   time.Now(),
 		}
 		err = TransactionRepo.CreateTransaction(transaction)
 		if err != nil {

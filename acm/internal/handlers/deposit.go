@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"acm/internal/auth"
 	"acm/internal/models"
@@ -41,9 +42,11 @@ func DepositHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		transaction := models.Transaction{
-			UserID: user.ID,
-			Type:   "deposit",
-			Amount: amount,
+			UserID:      user.ID,
+			Type:        "deposit",
+			Amount:      amount,
+			Description: "Deposit",
+			CreatedAt:   time.Now(),
 		}
 		err = TransactionRepo.CreateTransaction(transaction)
 		if err != nil {

@@ -17,6 +17,7 @@ func (r *TransactionRepository) CreateTable() error {
     user_id INTEGER NOT NULL,
     type TEXT NOT NULL,
     amount REAL NOT NULL,
+	description TEXT,
     created_at DATETIME NOT NULL
 )`
 	_, err := r.DB.Exec(query)
@@ -26,14 +27,15 @@ func (r *TransactionRepository) CreateTransaction(
 	transaction models.Transaction,
 ) error {
 	query := `
-	INSERT INTO transactions(user_id, type, amount, created_at)
-	VALUES (?, ?, ?, ?)`
+	INSERT INTO transactions(user_id, type, amount, description, created_at)
+	VALUES (?, ?, ?, ?, ?)`
 	_, err := r.DB.Exec(
 		query,
 		transaction.UserID,
 		transaction.Type,
 		transaction.Amount,
-		time.Now(),
+		transaction.Description,
+		transaction.CreatedAt,
 	)
 	return err
 }
@@ -44,7 +46,7 @@ func (r *TransactionRepository) GetTransactionsByUserID(
 	userID int,
 ) ([]models.Transaction, error) {
 	query := `
-	SELECT id, user_id, type, amount
+	SELECT id, user_id, type, amount, description, created_at
 	FROM transactions
 	WHERE user_id = ?
 	ORDER BY created_at DESC`
@@ -65,6 +67,7 @@ func (r *TransactionRepository) GetTransactionsByUserID(
 			&transaction.UserID,
 			&transaction.Type,
 			&transaction.Amount,
+			&transaction.Description,
 			&transaction.CreatedAt,
 		)
 		if err != nil {
@@ -97,9 +100,9 @@ func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) 
 }
 func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, error) {
 	rows, err := r.DB.Query(`
-	SELECT id, user_id, type, amount, created_at
+	SELECT id, user_id, type, amount, description, created_at
 	FROM transactions
-	ORDER BY id DESC
+	ORDER BY created_at DESC
 	`)
 	if err != nil {
 		return nil, err
@@ -115,6 +118,8 @@ func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, erro
 			&t.UserID,
 			&t.Type,
 			&t.Amount,
+			&t.Description,
+			&t.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -127,6 +132,8 @@ func (r *TransactionRepository) Transfer(
 	senderID int,
 	receiverID int,
 	amount float64,
+	senderEmail string,
+	receiverEmail string,
 ) error {
 
 	tx, err := r.DB.Begin()
@@ -135,11 +142,13 @@ func (r *TransactionRepository) Transfer(
 	}
 
 	_, err = tx.Exec(
-		`INSERT INTO transactions(user_id, type, amount, created_at)
-		 VALUES (?, ?, ?, ?)`,
+		`INSERT INTO transactions
+		(user_id, type, amount, description, created_at)
+		 VALUES (?, ?, ?, ?, ?)`,
 		senderID,
 		"transfer_out",
 		amount,
+		"transfer to "+receiverEmail,
 		time.Now(),
 	)
 	if err != nil {
@@ -148,11 +157,13 @@ func (r *TransactionRepository) Transfer(
 	}
 
 	_, err = tx.Exec(
-		`INSERT INTO transactions(user_id, type, amount, created_at)
-		 VALUES (?, ?, ?, ?)`,
+		`INSERT INTO transactions
+		(user_id, type, amount, description, created_at)
+		 VALUES (?, ?, ?, ?, ?)`,
 		receiverID,
 		"transfer_in",
 		amount,
+		"Transfer from"+senderEmail,
 		time.Now(),
 	)
 	if err != nil {

@@ -56,6 +56,8 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 			user.ID,
 			recipient.ID,
 			amount,
+			user.Email,
+			recipientEmail,
 		)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

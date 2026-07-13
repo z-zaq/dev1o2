@@ -5,9 +5,10 @@ import (
 )
 
 type Transaction struct {
-	ID        int
-	UserID    int
-	Type      string
-	Amount    float64
-	CreatedAt time.Time
+	ID          int
+	UserID      int
+	Type        string
+	Amount      float64
+	Description string
+	CreatedAt   time.Time
 }

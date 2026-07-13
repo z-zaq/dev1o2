@@ -8,22 +8,9 @@ import (
 )
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
-
-	cookie, err := r.Cookie("session")
+	user, err := auth.GetCurrentUser(r, UserRepo)
 	if err != nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	email, exists := auth.Sessions[cookie.Value]
-	if !exists {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	user, err := UserRepo.GetUserByEmail(email)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
 	}
 
