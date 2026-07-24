@@ -1,15 +1,13 @@
 package models
 
-//	type User struct {
-//		ID       int
-//		Name     string
-//		Email    string
-//		Password string
-//	}
 type User struct {
 	ID       int
 	Name     string
 	Email    string
 	Password string
-	IsAdmin  bool
+	Role     string // "user" or "admin"
+}
+
+func (u *User) IsAdmin() bool {
+	return u.Role == "admin"
 }

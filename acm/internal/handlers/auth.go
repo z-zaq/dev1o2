@@ -22,10 +22,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			Name:     r.FormValue("name"),
 			Email:    r.FormValue("email"),
 			Password: r.FormValue("password"),
-			IsAdmin:  false,
+			Role:     "user",
 		}
 		if user.Email == "admin@acm.com" {
-			user.IsAdmin = true
+			user.Role = "admin"
 		}
 		if user.Name == "" {
 			http.Error(w, "Name is required", http.StatusBadRequest)
@@ -83,10 +83,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		// if user.Password != password {
-		// 	http.Error(w, "Invalid credentials", http.StatusUnauthorized)
-		// 	return
-		// }
 		sessionID := auth.GenerateSessionID()
 		auth.Sessions[sessionID] = user.Email
 
@@ -96,10 +92,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			Path:  "/",
 		})
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
-
-		// log.Println("Email:", email)
-		// log.Println("password:", password)
-		// return
 	}
 	views.RenderTemplate(w, "login.html", nil)
 }

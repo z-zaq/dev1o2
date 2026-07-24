@@ -1,16 +1,23 @@
 {{define "content"}}
-<h1>login</h1>
+<section class="auth">
+    <div class="auth__card">
+        <p class="auth__eyebrow">Ledger №2 — Access</p>
+        <h1 class="auth__title">Log in</h1>
+        <p class="auth__subtitle">Enter your credentials to view your ledger.</p>
 
-<form method="POST" action="/login"> 
-    <label>Email</label>
-    <br>
-    <input type="email" name="email">
-    <br><br>
-    <label>Password</label>
-    <br>
-    <input type="password" name="password">
-    <br><br>
-    <button type="submit">Login</button>
-    <br>
-</form>
+        <form method="POST" action="/login" class="auth__form">
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" required autocomplete="email">
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn--primary btn--block">Log in</button>
+        </form>
+
+        <p class="auth__switch">New to Avalon? <a href="/register">Open an account</a></p>
+    </div>
+</section>
 {{end}}

@@ -8,7 +8,6 @@ import (
 	"acm/internal/auth"
 	"acm/internal/models"
 	"acm/internal/views"
-	// "acm/internal/repository"
 )
 
 func DepositHandler(w http.ResponseWriter, r *http.Request) {
@@ -22,13 +21,11 @@ func DepositHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	// get current user
 	user, err := UserRepo.GetUserByEmail(email)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusInternalServerError)
 		return
 	}
-	// handle form submission
 	if r.Method == http.MethodPost {
 		amountStr := r.FormValue("amount")
 
@@ -54,6 +51,17 @@ func DepositHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
 	}
-	views.RenderTemplate(w, "deposit.html", nil)
+	balance, err := TransactionRepo.GetBalanceByUserID(user.ID)
+	if err != nil {
+		http.Error(w, "Failed to load balance", http.StatusInternalServerError)
+		return
+	}
+	data := struct {
+		Balance float64
+	}{
+		Balance: balance,
+	}
+	views.RenderTemplate(w, "deposit.html", data)
 }

@@ -28,12 +28,24 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to load balance", http.StatusInternalServerError)
 		return
 	}
+	transactions, err := TransactionRepo.GetTransactionsByUserID(user.ID)
+	if err != nil {
+		http.Error(w, "Failed to load transaction history", http.StatusInternalServerError)
+		return
+	}
+	// Dashboard only shows the 5 most recent entries; full list lives on /history.
+	recent := transactions
+	if len(recent) > 5 {
+		recent = recent[:5]
+	}
 	data := struct {
 		User    *models.User
 		Balance float64
+		Recent  []models.Transaction
 	}{
 		User:    user,
 		Balance: balance,
+		Recent:  recent,
 	}
 	views.RenderTemplate(w, "dashboard.html", data)
 }

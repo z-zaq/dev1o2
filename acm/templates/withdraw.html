@@ -1,11 +1,20 @@
 {{define "content"}}
+<section class="auth">
+    <div class="auth__card">
+        <p class="auth__eyebrow">Ledger №4 — Withdrawal</p>
+        <h1 class="auth__title">Withdraw funds</h1>
+        <p class="entry__balance">Available balance: <span>${{printf "%.2f" .Balance}}</span></p>
 
-<h1>Withdraw Funds</h1>
+        <form method="POST" action="/withdraw" class="auth__form">
+            <div class="field">
+                <label for="amount">Amount (USD)</label>
+                <input id="amount" type="number" step="0.01" min="0.01" max="{{printf "%.2f" .Balance}}" name="amount" required autofocus>
+                <p class="field__hint">Cannot exceed your available balance.</p>
+            </div>
+            <button type="submit" class="btn btn--primary btn--block">Withdraw</button>
+        </form>
 
-<form method="POST" action="/withdraw">
-    <label>Amount:</label>
-    <input type="number" step="0.01" name="amount" required>
-    <br><br>
-    <button type="submit">Withdraw</button>
-</form>
+        <p class="auth__switch"><a href="/dashboard">← Back to dashboard</a></p>
+    </div>
+</section>
 {{end}}

@@ -66,5 +66,15 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 		return
 	}
-	views.RenderTemplate(w, "transfer.html", nil)
+	balance, err := TransactionRepo.GetBalanceByUserID(user.ID)
+	if err != nil {
+		http.Error(w, "Failed to load balance", http.StatusInternalServerError)
+		return
+	}
+	data := struct {
+		Balance float64
+	}{
+		Balance: balance,
+	}
+	views.RenderTemplate(w, "transfer.html", data)
 }

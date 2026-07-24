@@ -3,7 +3,7 @@ package repository
 import (
 	"acm/internal/models"
 	"database/sql"
-	// "golang.org/x/tools/go/analysis/passes/nilfunc"
+	"strings"
 )
 
 type UserRepository struct {
@@ -17,26 +17,41 @@ func (r *UserRepository) CreateTable() error {
 	name TEXT NOT NULL,
 	email TEXT UNIQUE NOT NULL,
 	password TEXT NOT NULL,
-	is_admin BOOLEAN DEFAULT FALSE)`
-	_, err := r.DB.Exec(query)
-	return err
+	role TEXT NOT NULL DEFAULT 'user')`
+	if _, err := r.DB.Exec(query); err != nil {
+		return err
+	}
+
+	// Migration path for databases created before this change: add the
+	// role column if it's not there yet, then backfill it from the old
+	// is_admin flag so existing admin accounts don't lose their access.
+	_, err := r.DB.Exec(`ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'`)
+	if err != nil && !strings.Contains(err.Error(), "duplicate column") {
+		return err
+	}
+	// Best-effort backfill; ignore the error if is_admin never existed
+	// (e.g. on a brand-new database that never had the old column).
+	r.DB.Exec(`UPDATE users SET role = 'admin' WHERE is_admin = 1 AND role != 'admin'`)
+
+	return nil
 }
+
 func (r *UserRepository) CreateUser(user models.User) error {
 	query := `
-	INSERT INTO users(name, email, password, is_admin)
+	INSERT INTO users(name, email, password, role)
 	VALUES (?,?,?,?)`
 	_, err := r.DB.Exec(
 		query,
 		user.Name,
 		user.Email,
 		user.Password,
-		user.IsAdmin,
+		user.Role,
 	)
 	return err
 }
 func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	query := `
-	SELECT id, name, email, password, is_admin
+	SELECT id, name, email, password, role
 	FROM users
 	WHERE email = ?`
 
@@ -47,7 +62,7 @@ func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 		&user.Name,
 		&user.Email,
 		&user.Password,
-		&user.IsAdmin,
+		&user.Role,
 	)
 	if err != nil {
 		return nil, err
@@ -56,7 +71,7 @@ func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 }
 func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	rows, err := r.DB.Query(`
-	SELECT id, name, email
+	SELECT id, name, email, role
 	FROM users
 	`)
 	if err != nil {
@@ -72,6 +87,7 @@ func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 			&user.ID,
 			&user.Name,
 			&user.Email,
+			&user.Role,
 		)
 		if err != nil {
 			return users, nil
@@ -124,4 +140,3 @@ func (r *UserRepository) UpdatePassword(
 
 	return err
 }
-

@@ -1,11 +1,90 @@
 {{define "content"}}
-<h1>Home Page</h1>
 
-<p>
-    Welcome to Avalon Capital Miner.
-</p>
+<section class="hero">
+    <div class="hero__inner">
+        <p class="hero__eyebrow">Ledger №1 — Opening entry</p>
+        <h1 class="hero__title">Every position,<br>accounted for.</h1>
+        <p class="hero__subtitle">
+            Avalon Capital Miner gives you one place to hold, track, and move
+            money across crypto, forex, and equities — with a full record of
+            every transaction, always visible to you.
+        </p>
+        <div class="hero__actions">
+            <a href="/register" class="btn btn--primary">Open an account</a>
+            <a href="/about" class="btn btn--ghost">How it works</a>
+        </div>
+    </div>
+</section>
 
-<p>
-    We provide professional investment solutions and portfolio management.
-</p>
+<div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+        <span class="ticker__item">BTC / USD</span>
+        <span class="ticker__item">ETH / USD</span>
+        <span class="ticker__item">EUR / USD</span>
+        <span class="ticker__item">GBP / USD</span>
+        <span class="ticker__item">S&amp;P 500</span>
+        <span class="ticker__item">NASDAQ 100</span>
+        <span class="ticker__item">GOLD (XAU)</span>
+        <span class="ticker__item">BTC / USD</span>
+        <span class="ticker__item">ETH / USD</span>
+        <span class="ticker__item">EUR / USD</span>
+        <span class="ticker__item">GBP / USD</span>
+        <span class="ticker__item">S&amp;P 500</span>
+        <span class="ticker__item">NASDAQ 100</span>
+        <span class="ticker__item">GOLD (XAU)</span>
+    </div>
+</div>
+
+<section class="ledger">
+    <div class="ledger__head">
+        <h2>What's on the ledger</h2>
+        <p>Four line items. No hidden pages.</p>
+    </div>
+
+    <div class="ledger__row">
+        <span class="ledger__index">01</span>
+        <div class="ledger__body">
+            <h3>Multi-asset accounts</h3>
+            <p>Hold balances across crypto, forex, and equities in a single
+               account, with your deposit and withdrawal history kept in one
+               continuous record.</p>
+        </div>
+    </div>
+
+    <div class="ledger__row">
+        <span class="ledger__index">02</span>
+        <div class="ledger__body">
+            <h3>Direct transfers</h3>
+            <p>Send funds to another Avalon account by email address. Every
+               transfer is logged on both sides the moment it clears.</p>
+        </div>
+    </div>
+
+    <div class="ledger__row">
+        <span class="ledger__index">03</span>
+        <div class="ledger__body">
+            <h3>Full transaction history</h3>
+            <p>Every deposit, withdrawal, and transfer is timestamped and
+               searchable from your dashboard — nothing is summarized away.</p>
+        </div>
+    </div>
+
+    <div class="ledger__row">
+        <span class="ledger__index">04</span>
+        <div class="ledger__body">
+            <h3>Plain-language support</h3>
+            <p>Questions about your account go to a person, not a bot script.
+               Reach us any time from the contact page.</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta-band">
+    <div class="cta-band__inner">
+        <h2>Start with an account, not a sales call.</h2>
+        <p>Registration takes under two minutes. No minimum deposit required.</p>
+        <a href="/register" class="btn btn--primary">Open an account</a>
+    </div>
+</section>
+
 {{end}}
