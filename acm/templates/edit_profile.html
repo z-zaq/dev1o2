@@ -1,19 +1,22 @@
 {{define "content"}}
+<section class="auth">
+    <div class="auth__card">
+        <p class="auth__eyebrow">Ledger №8 — Edit profile</p>
+        <h1 class="auth__title">Edit profile</h1>
 
-<h1>Edit Profile</h1>
+        <form method="POST" action="/profile/edit" class="auth__form">
+            <div class="field">
+                <label for="name">Full name</label>
+                <input id="name" type="text" name="name" value="{{.Name}}" required autocomplete="name">
+            </div>
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" type="email" name="email" value="{{.Email}}" required autocomplete="email">
+            </div>
+            <button type="submit" class="btn btn--primary btn--block">Save changes</button>
+        </form>
 
-<form method="POST" action="/profile/edit">
-
-    <label>Name:</label>
-    <input type="text" name="name" value="{{.Name}}" required>
-
-    <br><br>
-
-    <label>Email:</label>
-    <input type="email" name="email" value="{{.Email}}" required>
-
-    <br><br>
-
-    <button type="submit">Save Changes</button>
-</form>
+        <p class="auth__switch"><a href="/profile">← Back to profile</a></p>
+    </div>
+</section>
 {{end}}

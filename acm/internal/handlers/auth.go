@@ -24,7 +24,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			Password: r.FormValue("password"),
 			Role:     "user",
 		}
-		if user.Email == "admin@acm.com" {
+		if user.Email == "elzzaq7@gmail.com" {
 			user.Role = "admin"
 		}
 		if user.Name == "" {

@@ -563,3 +563,84 @@ main > .statement .statement__header {
 .hero--page .hero__subtitle {
     margin-bottom: 0;
 }
+
+/* ===== Profile stats + links ===== */
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.profile-stats__item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--parchment-dim);
+    border: 1px solid var(--hairline);
+    border-radius: 2px;
+    padding: 18px;
+    text-align: center;
+}
+.profile-stats__value {
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    color: var(--ink);
+}
+.profile-stats__label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--slate-dark);
+}
+.profile-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.action-tile--danger {
+    background: transparent;
+    border-color: rgba(166, 72, 58, 0.4);
+    color: #A6483A;
+}
+.action-tile--danger:hover {
+    background: #A6483A;
+    border-color: #A6483A;
+    color: var(--parchment);
+}
+
+/* ===== Danger zone (delete account) ===== */
+.auth__card--danger {
+    border-color: rgba(166, 72, 58, 0.5);
+}
+.auth__eyebrow--danger {
+    color: #A6483A;
+}
+.btn--danger {
+    background: #A6483A;
+    color: var(--parchment);
+}
+.btn--danger:hover {
+    background: #8A3A2F;
+}
+
+@media (max-width: 640px) {
+    .profile-stats,
+    .profile-links {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Nav auth-state toggle =====
+   Hidden by default so there's no flash of the wrong state before the
+   inline script in base.html runs; the script adds is-authed/is-anon to
+   <html> before the nav is parsed, so this resolves before paint. */
+.nav-anon, .nav-authed {
+    display: none;
+}
+html.is-anon .nav-anon {
+    display: inline-block;
+}
+html.is-authed .nav-authed {
+    display: inline-block;
+}

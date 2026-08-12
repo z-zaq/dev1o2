@@ -1,16 +1,41 @@
 {{define "content"}}
+<section class="statement">
+    <div class="statement__header">
+        <p class="statement__eyebrow">Ledger №8 — Account profile</p>
+        <h1 class="statement__title">{{.User.Name}}</h1>
+        <p class="statement__email">{{.User.Email}}</p>
+    </div>
 
-<h1>Profile</h1>
+    <div class="statement__balance">
+        <span class="statement__balance-label">Current balance</span>
+        <span class="statement__balance-amount">${{printf "%.2f" .Balance}}</span>
+    </div>
 
-<p>Name: {{.User.Name}}</p>
-<p>Email: {{.User.Email}}</p>
+    <div class="profile-stats">
+        <div class="profile-stats__item">
+            <span class="profile-stats__value">{{.DepositCount}}</span>
+            <span class="profile-stats__label">Deposits</span>
+        </div>
+        <div class="profile-stats__item">
+            <span class="profile-stats__value">{{.WithdrawalCount}}</span>
+            <span class="profile-stats__label">Withdrawals</span>
+        </div>
+        <div class="profile-stats__item">
+            <span class="profile-stats__value">{{.TransactionCount}}</span>
+            <span class="profile-stats__label">Total transactions</span>
+        </div>
+    </div>
 
-<h2>Account Statistics</h2>
-<a href="/profile">Profile</a>
-
-<p>Balance: {{.Balance}}</p>
-<p>Total Deposits: {{.DepositCount}}</p>
-<p>Total Withdrawals: {{.WithdrawalCount}}</p>
-<p>Total Transactions: {{.TransactionCount}}</p>
-
+    <div class="profile-links">
+        <a href="/profile/edit" class="action-tile">
+            <span class="action-tile__label">Edit profile</span>
+        </a>
+        <a href="/change-password" class="action-tile">
+            <span class="action-tile__label">Change password</span>
+        </a>
+        <a href="/delete-account" class="action-tile action-tile--danger">
+            <span class="action-tile__label">Delete account</span>
+        </a>
+    </div>
+</section>
 {{end}}

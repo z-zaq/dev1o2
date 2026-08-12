@@ -1,15 +1,20 @@
 {{define "content"}}
+<section class="auth">
+    <div class="auth__card auth__card--danger">
+        <p class="auth__eyebrow auth__eyebrow--danger">Ledger №8 — Delete account</p>
+        <h1 class="auth__title">Delete your account</h1>
+        <p class="auth__subtitle">
+            This permanently removes {{.Name}} ({{.Email}}) and its full
+            transaction history. This cannot be undone.
+        </p>
 
-<h1>Delete Account</h1>
+        <form method="POST" action="/delete-account" class="auth__form">
+            <button type="submit" class="btn btn--danger btn--block">
+                Delete my account permanently
+            </button>
+        </form>
 
-<p>
-Are you sure you want to permanently delete your account?
-</p>
-
-<form method="POST" action="/delete-account">
-    <button type="submit">
-        Delete My Account
-    </button>
-</form>
-
+        <p class="auth__switch"><a href="/profile">← Cancel, take me back</a></p>
+    </div>
+</section>
 {{end}}

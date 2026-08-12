@@ -3,6 +3,7 @@ package auth
 import (
 	"acm/internal/models"
 	"acm/internal/repository"
+	"errors"
 	"net/http"
 )
 
@@ -18,7 +19,7 @@ func GetCurrentUser(
 
 	email, exists := Sessions[cookie.Value]
 	if !exists {
-		return nil, err
+		return nil, errors.New("session not found or expired")
 	}
 
 	return userRepo.GetUserByEmail(email)
