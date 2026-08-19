@@ -29,6 +29,7 @@
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -39,6 +40,18 @@
                     <td>{{.Email}}</td>
                     <td>
                         <span class="role-badge role-badge--{{.Role}}">{{.Role}}</span>
+                    </td>
+                    <td>
+                        <form method="POST" action="/admin">
+                            <input type="hidden" name="user_id" value="{{.ID}}">
+                            {{if eq .Role "admin"}}
+                            <input type="hidden" name="role" value="user">
+                            <button type="submit" class="btn btn--danger">Demote</button>
+                            {{else}}
+                            <input type="hidden" name="role" value="admin">
+                            <button type="submit" class="btn btn--primary">Promote</button>
+                            {{end}}
+                        </form>
                     </td>
                 </tr>
                 {{end}}

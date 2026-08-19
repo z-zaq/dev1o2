@@ -23,9 +23,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			Password: r.FormValue("password"),
 			Role:     "user",
 		}
-		if user.Email == "admin@acm.com" {
-			user.Role = "admin"
-		}
 		if user.Name == "" {
 			http.Error(w, "Name is required", http.StatusBadRequest)
 			return
@@ -64,6 +61,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	views.RenderTemplate(w, r, "register.html", nil)
 }
+
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		email := r.FormValue("email")
@@ -97,6 +95,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	views.RenderTemplate(w, r, "login.html", nil)
 }
+
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session")
 
