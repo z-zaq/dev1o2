@@ -1,30 +1,15 @@
 package handlers
 
 import (
-	"acm/internal/auth"
+	"acm/internal/middleware"
 	"acm/internal/views"
 	"net/http"
 	"strconv"
 )
 
 func TransferHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+	user := middleware.UserFromContext(r)
 
-	email, exists := auth.Sessions[cookie.Value]
-	if !exists {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	user, err := UserRepo.GetUserByEmail(email)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusInternalServerError)
-		return
-	}
 	if r.Method == http.MethodPost {
 		recipientEmail := r.FormValue("recipient")
 		amountStr := r.FormValue("amount")
@@ -76,5 +61,5 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Balance: balance,
 	}
-	views.RenderTemplate(w, "transfer.html", data)
+	views.RenderTemplate(w, r, "transfer.html", data)
 }

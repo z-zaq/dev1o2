@@ -3,9 +3,9 @@ package main
 import (
 	"acm/internal/database"
 	"acm/internal/handlers"
+	"acm/internal/middleware"
 	"acm/internal/repository"
 
-	// "acm/internal/auth"
 	"log"
 	"net/http"
 )
@@ -17,7 +17,6 @@ func main() {
 	}
 	userRepo := &repository.UserRepository{
 		DB: db,
-		// handlers.UserRepo = userRepo
 	}
 	transactionRepo := &repository.TransactionRepository{
 		DB: db,
@@ -37,22 +36,28 @@ func main() {
 	mux := http.NewServeMux()
 	fs := http.FileServer(http.Dir("static"))
 	mux.Handle("/static/", http.StripPrefix("/static", fs))
+
+	// Public routes — no auth required.
 	mux.HandleFunc("/", handlers.HomeHandler)
 	mux.HandleFunc("/about", handlers.AboutHandler)
 	mux.HandleFunc("/contact", handlers.ContactHandler)
 	mux.HandleFunc("/login", handlers.LoginHandler)
 	mux.HandleFunc("/register", handlers.RegisterHandler)
-	mux.HandleFunc("/dashboard", handlers.DashboardHandler)
 	mux.HandleFunc("/logout", handlers.LogoutHandler)
-	mux.HandleFunc("/deposit", handlers.DepositHandler)
-	mux.HandleFunc("/withdraw", handlers.WithdrawHandler)
-	mux.HandleFunc("/history", handlers.HistoryHandler)
-	mux.HandleFunc("/admin", handlers.AdminHandler)
-	mux.HandleFunc("/profile", handlers.ProfileHandler)
-	mux.HandleFunc("/transfer", handlers.TransferHandler)
-	mux.HandleFunc("/profile/edit", handlers.EditProfileHandler)
-	mux.HandleFunc("/delete-account", handlers.DeleteAccountHandler)
-	mux.HandleFunc("/change-password", handlers.ChangePasswordHandler)
+
+	// Authenticated routes — require a valid session.
+	mux.HandleFunc("/dashboard", middleware.RequireAuth(userRepo, handlers.DashboardHandler))
+	mux.HandleFunc("/deposit", middleware.RequireAuth(userRepo, handlers.DepositHandler))
+	mux.HandleFunc("/withdraw", middleware.RequireAuth(userRepo, handlers.WithdrawHandler))
+	mux.HandleFunc("/history", middleware.RequireAuth(userRepo, handlers.HistoryHandler))
+	mux.HandleFunc("/profile", middleware.RequireAuth(userRepo, handlers.ProfileHandler))
+	mux.HandleFunc("/transfer", middleware.RequireAuth(userRepo, handlers.TransferHandler))
+	mux.HandleFunc("/profile/edit", middleware.RequireAuth(userRepo, handlers.EditProfileHandler))
+	mux.HandleFunc("/delete-account", middleware.RequireAuth(userRepo, handlers.DeleteAccountHandler))
+	mux.HandleFunc("/change-password", middleware.RequireAuth(userRepo, handlers.ChangePasswordHandler))
+
+	// Admin-only route.
+	mux.HandleFunc("/admin", middleware.RequireRole(userRepo, "admin", handlers.AdminHandler))
 
 	log.Println("Server started on http://localhost:8080")
 	http.ListenAndServe(":8080", mux)

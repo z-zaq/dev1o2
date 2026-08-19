@@ -9,7 +9,6 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	// "log"
 	"net/http"
 )
 
@@ -24,7 +23,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			Password: r.FormValue("password"),
 			Role:     "user",
 		}
-		if user.Email == "elzzaq7@gmail.com" {
+		if user.Email == "admin@acm.com" {
 			user.Role = "admin"
 		}
 		if user.Name == "" {
@@ -63,7 +62,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
-	views.RenderTemplate(w, "register.html", nil)
+	views.RenderTemplate(w, r, "register.html", nil)
 }
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
@@ -83,29 +82,35 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		sessionID := auth.GenerateSessionID()
-		auth.Sessions[sessionID] = user.Email
+		sessionID := auth.CreateSession(user.Email)
 
 		http.SetCookie(w, &http.Cookie{
-			Name:  "session",
-			Value: sessionID,
-			Path:  "/",
+			Name:     "session",
+			Value:    sessionID,
+			Path:     "/",
+			MaxAge:   int(auth.SessionTTL.Seconds()),
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteLaxMode,
 		})
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 	}
-	views.RenderTemplate(w, "login.html", nil)
+	views.RenderTemplate(w, r, "login.html", nil)
 }
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session")
 
 	if err == nil {
-		delete(auth.Sessions, cookie.Value)
+		auth.DeleteSession(cookie.Value)
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:   "session",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
+		Name:     "session",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
 	})
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

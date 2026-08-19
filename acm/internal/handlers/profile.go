@@ -1,18 +1,14 @@
 package handlers
 
 import (
-	"acm/internal/auth"
+	"acm/internal/middleware"
 	"acm/internal/models"
 	"acm/internal/views"
 	"net/http"
 )
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
-	user, err := auth.GetCurrentUser(r, UserRepo)
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+	user := middleware.UserFromContext(r)
 
 	balance, err := TransactionRepo.GetBalanceByUserID(user.ID)
 	if err != nil {
@@ -53,5 +49,5 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		TransactionCount: len(transactions),
 	}
 
-	views.RenderTemplate(w, "profile.html", data)
+	views.RenderTemplate(w, r, "profile.html", data)
 }

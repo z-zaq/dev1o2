@@ -1,28 +1,15 @@
 package handlers
 
 import (
-	"acm/internal/auth"
+	"acm/internal/middleware"
 	"acm/internal/models"
 	"acm/internal/views"
 	"net/http"
 )
 
 func DashboardHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	email, exists := auth.Sessions[cookie.Value]
-	if !exists {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	user, err := UserRepo.GetUserByEmail(email)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusInternalServerError)
-		return
-	}
+	user := middleware.UserFromContext(r)
+
 	balance, err := TransactionRepo.GetBalanceByUserID(user.ID)
 	if err != nil {
 		http.Error(w, "Failed to load balance", http.StatusInternalServerError)
@@ -33,7 +20,6 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to load transaction history", http.StatusInternalServerError)
 		return
 	}
-	// Dashboard only shows the 5 most recent entries; full list lives on /history.
 	recent := transactions
 	if len(recent) > 5 {
 		recent = recent[:5]
@@ -47,5 +33,5 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
 		Balance: balance,
 		Recent:  recent,
 	}
-	views.RenderTemplate(w, "dashboard.html", data)
+	views.RenderTemplate(w, r, "dashboard.html", data)
 }

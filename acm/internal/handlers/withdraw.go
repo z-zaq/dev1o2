@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"acm/internal/auth"
+	"acm/internal/middleware"
 	"acm/internal/models"
 	"acm/internal/views"
 	"net/http"
@@ -10,21 +10,8 @@ import (
 )
 
 func WithdrawHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	email, exists := auth.Sessions[cookie.Value]
-	if !exists {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-	user, err := UserRepo.GetUserByEmail(email)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusInternalServerError)
-		return
-	}
+	user := middleware.UserFromContext(r)
+
 	if r.Method == http.MethodPost {
 
 		amountStr := r.FormValue("amount")
@@ -72,5 +59,5 @@ func WithdrawHandler(w http.ResponseWriter, r *http.Request) {
 	}{
 		Balance: balance,
 	}
-	views.RenderTemplate(w, "withdraw.html", data)
+	views.RenderTemplate(w, r, "withdraw.html", data)
 }

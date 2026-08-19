@@ -2,49 +2,38 @@ package handlers
 
 import (
 	"acm/internal/auth"
+	"acm/internal/middleware"
 	"acm/internal/views"
 	"net/http"
 )
 
 func DeleteAccountHandler(w http.ResponseWriter, r *http.Request) {
+	user := middleware.UserFromContext(r)
 
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	email, exists := auth.Sessions[cookie.Value]
-	if !exists {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	user, err := UserRepo.GetUserByEmail(email)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusInternalServerError)
-		return
-	}
 	if r.Method == http.MethodPost {
+		err := UserRepo.DeleteUser(user.ID)
+		if err != nil {
+			http.Error(w, "Failed to delete account", http.StatusInternalServerError)
+			return
+		}
 
-	err = UserRepo.DeleteUser(user.ID)
-	if err != nil {
-		http.Error(w, "Failed to delete account", http.StatusInternalServerError)
+		if cookie, err := r.Cookie("session"); err == nil {
+			auth.DeleteSession(cookie.Value)
+		}
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "session",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteLaxMode,
+		})
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
-	delete(auth.Sessions, cookie.Value)
-
-	http.SetCookie(w, &http.Cookie{
-		Name:   "session",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	})
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-	return
-}
-
-	views.RenderTemplate(w, "delete_account.html", user)
+	views.RenderTemplate(w, r, "delete_account.html", user)
 }

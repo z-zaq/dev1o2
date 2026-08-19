@@ -17,7 +17,7 @@ func GetCurrentUser(
 		return nil, err
 	}
 
-	email, exists := Sessions[cookie.Value]
+	email, exists := GetSessionEmail(cookie.Value)
 	if !exists {
 		return nil, errors.New("session not found or expired")
 	}

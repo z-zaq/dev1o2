@@ -10,14 +10,6 @@
         <link rel="stylesheet" href="/static/css/style.css">
     </head>
     <body>
-        <script>
-            // Stopgap nav-state toggle: the session cookie isn't HttpOnly yet,
-            // so we can check for its presence client-side. This breaks once
-            // the cookie is hardened later — see AGENT.md.
-            document.documentElement.classList.add(
-                document.cookie.indexOf('session=') !== -1 ? 'is-authed' : 'is-anon'
-            );
-        </script>
         <header class="site-header">
             <div class="site-header__inner">
                 <a href="/" class="brand">
@@ -29,12 +21,14 @@
                     <a href="/about">About</a>
                     <a href="/contact">Contact</a>
 
-                    <a href="/login" class="nav-anon">Log in</a>
-                    <a href="/register" class="site-nav__cta nav-anon">Open an account</a>
-
-                    <a href="/dashboard" class="nav-authed">Dashboard</a>
-                    <a href="/profile" class="nav-authed">Profile</a>
-                    <a href="/logout" class="site-nav__logout nav-authed">Log out</a>
+                    {{if LoggedIn}}
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/profile">Profile</a>
+                    <a href="/logout" class="site-nav__logout">Log out</a>
+                    {{else}}
+                    <a href="/login">Log in</a>
+                    <a href="/register" class="site-nav__cta">Open an account</a>
+                    {{end}}
                 </nav>
             </div>
         </header>
@@ -49,9 +43,12 @@
                 <div class="site-footer__links">
                     <a href="/about">About</a>
                     <a href="/contact">Contact</a>
-                    <a href="/login" class="nav-anon">Log in</a>
-                    <a href="/register" class="nav-anon">Register</a>
-                    <a href="/logout" class="nav-authed">Logout</a>
+                    {{if LoggedIn}}
+                    <a href="/logout">Logout</a>
+                    {{else}}
+                    <a href="/login">Log in</a>
+                    <a href="/register">Register</a>
+                    {{end}}
                 </div>
                 <div class="site-footer__legal">© 2026 Avalon Capital Miner. All figures are illustrative pending live account data.</div>
             </div>
