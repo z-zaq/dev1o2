@@ -69,6 +69,26 @@ func (r *UserRepository) GetUserByEmail(email string) (*models.User, error) {
 	}
 	return user, nil
 }
+func (r *UserRepository) GetUserByID(userID int) (*models.User, error) {
+	query := `
+	SELECT id, name, email, password, role
+	FROM users
+	WHERE id = ?`
+
+	user := &models.User{}
+
+	err := r.DB.QueryRow(query, userID).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.Role,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
 func (r *UserRepository) GetAllUsers() ([]models.User, error) {
 	rows, err := r.DB.Query(`
 	SELECT id, name, email, role
@@ -139,4 +159,25 @@ func (r *UserRepository) UpdatePassword(
 	)
 
 	return err
+}
+
+// UpdateUserRole sets a user's role directly. Callers are responsible for
+// validating the role value and any business rules (e.g. not demoting the
+// last admin) before calling this.
+func (r *UserRepository) UpdateUserRole(userID int, role string) error {
+	query := `
+	UPDATE users
+	SET role = ?
+	WHERE id = ?
+	`
+	_, err := r.DB.Exec(query, role, userID)
+	return err
+}
+
+// CountAdmins returns how many users currently have the admin role — used
+// to prevent demoting the last remaining admin.
+func (r *UserRepository) CountAdmins() (int, error) {
+	var count int
+	err := r.DB.QueryRow(`SELECT COUNT(*) FROM users WHERE role = 'admin'`).Scan(&count)
+	return count, err
 }
