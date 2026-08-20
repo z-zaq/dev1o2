@@ -1,0 +1,82 @@
+{{define "content"}}
+<section class="statement">
+    <div class="statement__header">
+        <p class="statement__eyebrow">Ledger №10 — Admin</p>
+        <h1 class="statement__title">Create investment plan</h1>
+        <p class="statement__email">
+            Define the terms and limits for a new investment plan.
+        </p>
+    </div>
+
+    <div class="statement__recent">
+        <div class="statement__recent-head">
+            <h2>Plan details</h2>
+        </div>
+
+        <form method="POST" action="/admin/plans" class="auth__form">
+            <label for="name">Plan name</label>
+            <input
+                id="name"
+                type="text"
+                name="name"
+                placeholder="Growth Portfolio"
+                required
+            >
+
+            <label for="asset_class">Asset class</label>
+            <input
+                id="asset_class"
+                type="text"
+                name="asset_class"
+                placeholder="Stocks"
+                required
+            >
+
+            <label for="duration">Duration (days)</label>
+            <input
+                id="duration"
+                type="number"
+                name="duration"
+                min="1"
+                placeholder="90"
+                required
+            >
+
+            <label for="rate_structure">Rate structure</label>
+            <input
+                id="rate_structure"
+                type="text"
+                name="rate_structure"
+                placeholder="Fixed"
+                required
+            >
+
+            <label for="min_deposit">Minimum deposit</label>
+            <input
+                id="min_deposit"
+                type="number"
+                name="min_deposit"
+                min="0.01"
+                step="0.01"
+                placeholder="100"
+                required
+            >
+
+            <label for="max_deposit">Maximum deposit</label>
+            <input
+                id="max_deposit"
+                type="number"
+                name="max_deposit"
+                min="0.01"
+                step="0.01"
+                placeholder="10000"
+                required
+            >
+
+            <button type="submit" class="btn btn--primary btn--block">
+                Create plan
+            </button>
+        </form>
+    </div>
+</section>
+{{end}}
