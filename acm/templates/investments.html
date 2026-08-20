@@ -2,7 +2,9 @@
 <section class="statement">
     <div class="statement__header">
         <p class="statement__eyebrow">Ledger №11 — Portfolio</p>
+
         <h1 class="statement__title">My investments</h1>
+
         <p class="statement__email">
             Track your active and completed investments.
         </p>
@@ -21,7 +23,10 @@
                     <th>Plan</th>
                     <th>Asset class</th>
                     <th>Principal</th>
+                    <th>Current value</th>
+                    <th>Profit</th>
                     <th>Rate</th>
+                    <th>Progress</th>
                     <th>Started</th>
                     <th>Matures</th>
                     <th>Status</th>
@@ -31,16 +36,32 @@
             <tbody>
                 {{range .}}
                 <tr>
-                    <td>{{.Plan.Name}}</td>
+                    <td>
+                        {{.Plan.Name}}
+                    </td>
 
-                    <td>{{.Plan.AssetClass}}</td>
+                    <td>
+                        {{.Plan.AssetClass}}
+                    </td>
 
                     <td class="ledger-table__amount">
-                        ${{printf "%.2f" .Investment.Principal}}
+                        ${{printf "%.2f" .Valuation.Principal}}
+                    </td>
+
+                    <td class="ledger-table__amount">
+                        ${{printf "%.2f" .Valuation.CurrentValue}}
+                    </td>
+
+                    <td class="ledger-table__amount">
+                        +${{printf "%.2f" .Valuation.Profit}}
                     </td>
 
                     <td>
                         {{printf "%.2f" .Plan.RateValue}}%
+                    </td>
+
+                    <td>
+                        {{printf "%.0f" (mul .Valuation.Progress 100)}}%
                     </td>
 
                     <td>

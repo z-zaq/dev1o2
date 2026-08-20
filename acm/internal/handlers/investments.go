@@ -3,13 +3,16 @@ package handlers
 import (
 	"acm/internal/middleware"
 	"acm/internal/models"
+	"acm/internal/services"
 	"acm/internal/views"
 	"net/http"
+	"time"
 )
 
 type InvestmentView struct {
 	Investment models.Investment
 	Plan       *models.Plan
+	Valuation  services.InvestmentValuation
 }
 
 func InvestmentsHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,9 +33,20 @@ func InvestmentsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		valuation, err := services.CalculateInvestmentValue(
+			investment,
+			*plan,
+			time.Now(),
+		)
+		if err != nil {
+			http.Error(w, "Failed to calculate investment value", http.StatusInternalServerError)
+			return
+		}
+
 		viewsData = append(viewsData, InvestmentView{
 			Investment: investment,
 			Plan:       plan,
+			Valuation:  valuation,
 		})
 	}
 
