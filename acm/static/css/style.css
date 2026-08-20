@@ -665,3 +665,21 @@ html.is-authed .nav-authed {
     border-color: var(--brass);
     background: rgba(184, 147, 63, 0.1);
 }
+
+/* ===== Investment maturity claim (investments.html) ===== */
+.btn--small {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+.ledger-table__inline-form {
+    display: inline-block;
+    margin-top: 6px;
+}
+.ledger-table__note {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    color: var(--slate-dark);
+}

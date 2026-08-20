@@ -231,7 +231,7 @@ func (r *InvestmentRepository) MatureInvestment(
 		return err
 	}
 
-	_, err = tx.Exec(`
+	result, err := tx.Exec(`
 		UPDATE investments
 		SET status = 'matured'
 		WHERE id = ?
@@ -242,6 +242,17 @@ func (r *InvestmentRepository) MatureInvestment(
 	if err != nil {
 		tx.Rollback()
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if rowsAffected == 0 {
+		tx.Rollback()
+		return sql.ErrNoRows
 	}
 
 	_, err = tx.Exec(`

@@ -76,6 +76,7 @@ func main() {
 	mux.HandleFunc("/dashboard", middleware.RequireAuth(userRepo, handlers.DashboardHandler))
 	mux.HandleFunc("/invest", middleware.RequireAuth(userRepo, handlers.InvestHandler))
 	mux.HandleFunc("/investments", middleware.RequireAuth(userRepo, handlers.InvestmentsHandler))
+	mux.HandleFunc("/investments/mature", middleware.RequireAuth(userRepo, handlers.MatureInvestmentHandler))
 	mux.HandleFunc("/plans", middleware.RequireAuth(userRepo, handlers.PlansHandler))
 	mux.HandleFunc("/deposit", middleware.RequireAuth(userRepo, handlers.DepositHandler))
 	mux.HandleFunc("/withdraw", middleware.RequireAuth(userRepo, handlers.WithdrawHandler))

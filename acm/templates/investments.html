@@ -76,6 +76,17 @@
                         <span class="role-badge role-badge--{{.Investment.Status}}">
                             {{.Investment.Status}}
                         </span>
+
+                        {{if eq .Investment.Status "active"}}
+                            {{if .Valuation.Matured}}
+                            <form action="/investments/mature" method="POST" class="ledger-table__inline-form">
+                                <input type="hidden" name="investment_id" value="{{.Investment.ID}}">
+                                <button type="submit" class="btn btn--primary btn--small">Claim</button>
+                            </form>
+                            {{else}}
+                            <p class="ledger-table__note">Awaiting maturity</p>
+                            {{end}}
+                        {{end}}
                     </td>
                 </tr>
                 {{end}}
