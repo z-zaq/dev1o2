@@ -15,6 +15,7 @@ import (
 var UserRepo *repository.UserRepository
 var TransactionRepo *repository.TransactionRepository
 var PlanRepo *repository.PlanRepository
+var InvestmentRepo *repository.InvestmentRepository
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {

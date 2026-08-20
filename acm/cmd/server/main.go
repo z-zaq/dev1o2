@@ -24,12 +24,17 @@ func main() {
 		DB: db,
 	}
 
+	investmentRepo := &repository.InvestmentRepository{
+		DB: db,
+	}
+
 	planRepo := &repository.PlanRepository{
 		DB: db,
 	}
 
 	handlers.TransactionRepo = transactionRepo
 	handlers.PlanRepo = planRepo
+	handlers.InvestmentRepo = investmentRepo
 	handlers.UserRepo = userRepo
 
 	err = userRepo.CreateTable()
@@ -38,6 +43,11 @@ func main() {
 	}
 
 	err = transactionRepo.CreateTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = investmentRepo.CreateTable()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,6 +74,8 @@ func main() {
 
 	// Authenticated routes — require a valid session.
 	mux.HandleFunc("/dashboard", middleware.RequireAuth(userRepo, handlers.DashboardHandler))
+	mux.HandleFunc("/invest", middleware.RequireAuth(userRepo, handlers.InvestHandler))
+	mux.HandleFunc("/investments", middleware.RequireAuth(userRepo, handlers.InvestmentsHandler))
 	mux.HandleFunc("/plans", middleware.RequireAuth(userRepo, handlers.PlansHandler))
 	mux.HandleFunc("/deposit", middleware.RequireAuth(userRepo, handlers.DepositHandler))
 	mux.HandleFunc("/withdraw", middleware.RequireAuth(userRepo, handlers.WithdrawHandler))

@@ -1,0 +1,56 @@
+{{define "content"}}
+<section class="statement">
+    <div class="statement__header">
+        <p class="statement__eyebrow">Ledger №10 — Investment</p>
+        <h1 class="statement__title">Start an investment</h1>
+        <p class="statement__email">Choose a plan and enter your investment amount.</p>
+    </div>
+
+    {{if .}}
+    <div class="statement__recent">
+        <table class="ledger-table">
+            <thead>
+                <tr>
+                    <th>Plan</th>
+                    <th>Asset class</th>
+                    <th>Duration</th>
+                    <th>Rate</th>
+                    <th>Investment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.AssetClass}}</td>
+                    <td>{{.Duration}} days</td>
+                    <td>{{printf "%.2f" .RateValue}}%</td>
+                    <td>
+                        <form method="POST" action="/invest" class="auth__form">
+                            <input type="hidden" name="plan_id" value="{{.ID}}">
+
+                            <input
+                                type="number"
+                                name="amount"
+                                min="{{.MinDeposit}}"
+                                max="{{.MaxDeposit}}"
+                                step="0.01"
+                                placeholder="{{printf "%.2f" .MinDeposit}} - {{printf "%.2f" .MaxDeposit}}"
+                                required
+                            >
+
+                            <button type="submit" class="btn btn--primary">
+                                Invest
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+    {{else}}
+    <p class="statement__empty">No investment plans are currently available.</p>
+    {{end}}
+</section>
+{{end}}

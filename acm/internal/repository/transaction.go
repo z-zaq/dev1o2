@@ -79,11 +79,13 @@ func (r *TransactionRepository) GetTransactionsByUserID(
 }
 func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) {
 	query := `
-	SELECT COALESCE(SUM(CASE 
+	SELECT COALESCE(SUM(CASE
 	WHEN type = 'deposit' THEN amount
 	WHEN type = 'transfer_in' THEN amount
 	WHEN type = 'withdrawal' THEN -amount
 	WHEN type = 'transfer_out' THEN -amount
+	WHEN type = 'investment' THEN -amount
+	WHEN type = 'investment_return' THEN amount
 	ELSE 0
 	END), 0)
 	FROM transactions
@@ -96,8 +98,10 @@ func (r *TransactionRepository) GetBalanceByUserID(userID int) (float64, error) 
 	if err != nil {
 		return 0, err
 	}
+
 	return balance, nil
 }
+
 func (r *TransactionRepository) GetAllTransactions() ([]models.Transaction, error) {
 	rows, err := r.DB.Query(`
 	SELECT id, user_id, type, amount, description, created_at
