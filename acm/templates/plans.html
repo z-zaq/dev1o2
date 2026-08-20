@@ -18,7 +18,7 @@
                     <th>Plan</th>
                     <th>Asset class</th>
                     <th>Duration</th>
-                    <th>Rate structure</th>
+                    <th>Return</th>
                     <th>Minimum</th>
                     <th>Maximum</th>
                 </tr>
@@ -29,7 +29,7 @@
                     <td>{{.Name}}</td>
                     <td>{{.AssetClass}}</td>
                     <td>{{.Duration}} days</td>
-                    <td>{{.RateStructure}}</td>
+                    <td>{{printf "%.2f" .RateValue}}% (compounded daily)</td>
                     <td>${{printf "%.2f" .MinDeposit}}</td>
                     <td>${{printf "%.2f" .MaxDeposit}}</td>
                 </tr>

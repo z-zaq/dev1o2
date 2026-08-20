@@ -1,4 +1,4 @@
-# AGENT.md — Handover Specification (v3)
+# AGENT.md — Handover Specification (v4)
 
 **Purpose:** handover note for the next LLM agent or engineer picking up
 this codebase mid-stream. Read fully before touching anything.
@@ -12,53 +12,77 @@ this codebase mid-stream. Read fully before touching anything.
 - **The human applies and tests every change themselves**, then reports
   back before the next file is given.
 - **"No build error" is NOT sufficient confirmation for template/CSS/static
-  file changes.** See §1.4 — a whole batch of files silently failed to
-  save in a prior session despite the human reporting no errors, because
-  Go's build only checks `.go` files, not templates or CSS. From now on,
-  verify every non-Go file write with an explicit command
-  (`grep -c 'something-unique' path/to/file`) and require the human to
-  paste the actual number back, not just say "it worked." For visual/CSS
-  changes, ask for a screenshot or a specific description of what
-  rendered, not just "no error."
-- Full-file rewrites (`cat >`) are the default; `cat >>` only for genuinely
-  additive changes (e.g. appending CSS to the end of the stylesheet).
+  file changes.** A whole batch of template files silently failed to save
+  in an earlier session despite the human reporting no errors, because
+  Go's build only checks `.go` files. Always verify non-Go file writes
+  with an explicit command (`grep -c 'something-unique' path/to/file`)
+  and require the actual number back, not just "it worked." For
+  visual/CSS changes, ask for a screenshot or specific description of
+  what rendered.
+- Full-file rewrites (`cat >`) are the default; `cat >>` only for
+  genuinely additive changes (e.g. appending CSS to the end of the
+  stylesheet).
 - No Go toolchain available to the agent in this sandboxed environment —
   the human is the entire build/test loop.
+- **Re-verify actual file contents before assuming this document is
+  current.** More than once this project has had work done between
+  sessions (by the human directly, or by another agent) that this
+  document didn't yet reflect. Always `view`/`cat` the real files —
+  ideally from a fresh zip upload if one's available — before planning
+  the next step.
 
 ---
 
 ## 1. Current State
 
 **Stack:** Go (stdlib `net/http`, `html/template`), SQLite, bcrypt,
-in-memory session map (`acm/internal/auth.Sessions`). No frontend
-framework — server-rendered templates.
+in-memory session store with expiry (`internal/auth/session.go`). No
+frontend framework — server-rendered templates.
 
-### 1.1 Backend changes made and CONFIRMED working
-- `internal/models/user.go` — `Role string` (`"user"`/`"admin"`) replaces
-  the old `IsAdmin bool` field; `IsAdmin() bool` is now a derived method.
-- `internal/repository/user.go` — `CreateTable()` migrates existing DBs
-  (adds `role` column if missing, backfills from old `is_admin`). CRUD
-  methods updated accordingly.
-- `internal/handlers/auth.go` — sets `Role: "user"` by default,
-  `"admin"` only for the hardcoded `admin@acm.com` email (**this backdoor
-  still exists** — see §3).
-- `internal/handlers/admin.go` — `/admin` now actually requires a valid
-  session AND `user.IsAdmin()`. Previously had zero auth check.
-- `internal/handlers/dashboard.go` — passes `Recent` (last 5 transactions)
-  alongside `User`/`Balance`.
-- `internal/handlers/deposit.go`, `withdraw.go`, `transfer.go` — GET
-  branches pass `Balance` for display context.
-- `internal/auth/current_user.go` — **bug fix.** Previously, a session
-  cookie with no matching entry in `Sessions` (e.g. after a server
-  restart, which wipes the in-memory map) caused `GetCurrentUser` to
-  return `(nil, nil)` — a nil user with no error. Callers that only check
-  `err != nil` (like `ProfileHandler`) would then panic dereferencing the
-  nil pointer, causing a full server crash on that request (symptom:
-  blank browser page + `curl` reporting "empty reply from server"). Fixed
-  to return a proper error when the session isn't found. **Confirmed
-  fixed and tested** by the human.
+### 1.1 Auth & security — COMPLETE
+- `Role string` (`"user"`/`"admin"`) on `models.User`, with `IsAdmin()`
+  as a derived method (not a settable field).
+- **Hardcoded `admin@acm.com` backdoor is REMOVED.** `RegisterHandler`
+  always creates new users with `Role: "user"` — no special-cased email.
+- **Promote/demote flow is built and working.** `/admin` (POST) takes
+  `user_id` + `role` and calls `UserRepo.UpdateUserRole`. Protected by a
+  last-admin check: `UserRepo.CountAdmins()` is consulted before any
+  demotion, and demoting the sole remaining admin is rejected with a 400.
+  `templates/admin.html` has Promote/Demote buttons per user row, wired
+  to this endpoint.
+- **Auth middleware** (`internal/middleware/auth.go`) — `RequireAuth`
+  and `RequireRole` wrap handlers, resolve the session into a
+  `*models.User`, and attach it to the request context. Handlers read it
+  via `middleware.UserFromContext(r)` instead of each repeating a
+  cookie/session/user lookup. `cmd/server/main.go` wraps every
+  authenticated route with one of these two.
+- **Session hardening** — `internal/auth/session.go` uses a
+  mutex-guarded map with 24h TTL (`auth.SessionTTL`), lazy expiry on
+  lookup. Access only via `CreateSession`/`GetSessionEmail`/
+  `DeleteSession` — no exported raw map. Login cookie sets
+  `HttpOnly: true`, `Secure: true`, `SameSite: Lax`.
+  ⚠️ `Secure: true` means the cookie is HTTPS-only — works on the dev
+  tunnel URL, but will silently break login on plain `http://localhost`
+  with no TLS proxy in front. Don't mistake that for a new bug if it
+  comes up.
+- **Nav is server-rendered**, not JS-based. `views.RenderTemplate` takes
+  `r *http.Request`, resolves login state server-side, and exposes a
+  `LoggedIn` template function used in `base.html` via
+  `{{if LoggedIn}}...{{else}}...{{end}}`. This is why `RenderTemplate`'s
+  signature is `(w, r, file, data)` — every handler's call site reflects
+  this.
+- `internal/auth/current_user.go`'s `GetCurrentUser` was fixed early on
+  (a stale/missing session used to return `(nil, nil)` — no error —
+  causing a nil-pointer panic in callers that only checked `err != nil`).
+  It's likely unused now that handlers use `middleware.UserFromContext`
+  instead, but is still correct if anything calls it.
 
-### 1.2 Frontend design system (established, confirmed working, reuse it)
+**All of §1.1 is confirmed working** via direct testing: non-admin denied
+`/admin` (403), unauthenticated denied protected routes (redirect to
+`/login`), promote/demote tested end-to-end including the last-admin
+guard, cookie flags confirmed via DevTools.
+
+### 1.2 Frontend design system — reuse, don't reinvent
 
 **Brand:** "Avalon Capital Miner" — ledger-book aesthetic: numbered rows,
 hairline dividers, scrolling ticker tape, mono figures for all numbers.
@@ -72,18 +96,16 @@ hairline dividers, scrolling ticker tape, mono figures for all numbers.
 --slate: #8A93A3;  --slate-dark: #4C5567;
 --hairline: rgba(184, 147, 63, 0.35);
 ```
-Danger/destructive color used ad hoc (not yet tokenized): `#A6483A`
-(hover `#8A3A2F`) — used in `.btn--danger`, `.auth__card--danger`,
-`.action-tile--danger`. **Consider promoting this to a `--danger` CSS
-variable next time style.css is touched, for consistency.**
+Danger color used ad hoc, not yet tokenized: `#A6483A` (hover `#8A3A2F`)
+— used in `.btn--danger`, `.auth__card--danger`, `.action-tile--danger`.
 
 Fonts: `Fraunces` (display/headings), `IBM Plex Sans` (body),
-`IBM Plex Mono` (all numbers/labels/tickers). Loaded via Google Fonts link
-in `base.html`.
+`IBM Plex Mono` (numbers/labels/tickers). Loaded via Google Fonts link in
+`base.html`.
 
-**Reusable classes** — do not reinvent, reuse:
-- `.hero` / `.hero--page` — dark intro band (full on homepage, short
-  variant on About/Contact)
+**Reusable classes:**
+- `.hero` / `.hero--page` — dark intro band (full on homepage, short on
+  About/Contact)
 - `.ticker` / `.ticker__track` / `.ticker__item` — scrolling tape,
   homepage only, respects `prefers-reduced-motion`
 - `.ledger` / `.ledger__row` / `.ledger__index` / `.ledger__body` —
@@ -91,184 +113,102 @@ in `base.html`.
 - `.cta-band` — light CTA band, homepage only
 - `.auth` / `.auth__card` / `.auth__form` / `.field` / `.auth__switch` —
   dark card form layout: login, register, deposit, withdraw, transfer,
-  edit-profile, change-password. `.entry__balance` adds a balance readout
-  line above the form (deposit/withdraw/transfer only).
+  edit-profile, change-password, **admin_plan (plan creation form)**.
+  `.entry__balance` adds a balance readout line above deposit/withdraw/
+  transfer forms specifically.
 - `.auth__card--danger` / `.auth__eyebrow--danger` / `.btn--danger` —
-  destructive variant, used only on `delete_account.html`
+  destructive variant, `delete_account.html` only
 - `.statement` / `.statement__balance` / `.statement__actions` /
-  `.action-tile` / `.action-tile--danger` — dashboard/profile account-view
-  layout
-- `.profile-stats` / `.profile-stats__item` — 3-stat grid on `/profile`
-- `.ledger-table` — data table, dashboard recent-activity + `/history`
-  (green/red via `.ledger-table__amount--{{.Type}}`)
-- `.site-header` / `.site-nav` / `.site-footer` — global chrome in
+  `.action-tile` / `.action-tile--danger` — dashboard/profile/admin/plans
+  account-view layout
+- `.profile-stats` / `.profile-stats__item` — stat grid, `/profile` and
+  `/admin`
+- `.ledger-table` — data table: dashboard recent-activity, `/history`,
+  `/admin` (users + transactions), `/plans` (plan list)
+- `.role-badge` / `.role-badge--admin` — role pill in the admin users
+  table
+- `.site-header` / `.site-nav` / `.site-footer` — global chrome,
   `base.html`
-- `.nav-anon` / `.nav-authed` — legacy classes, no longer used by
-  `base.html` as of §1.3, may still exist as dead CSS
+- `.nav-anon` / `.nav-authed` — **dead CSS**, no longer referenced by any
+  template since the nav went server-rendered (§1.1). Harmless but could
+  be deleted next time `style.css` is touched.
 
-**Pages fully restyled and visually confirmed by the human:** homepage,
-`base.html`, login, register, dashboard, deposit, withdraw, transfer,
-history, about, contact, profile, edit-profile, change-password,
-delete-account, admin.
+**Pages fully restyled and confirmed:** homepage, base.html, login,
+register, dashboard, deposit, withdraw, transfer, history, about,
+contact, profile, edit-profile, change-password, delete-account, admin,
+plans, admin_plan.
 
-**All pages are now styled.** The visual pass described in this document
-is complete — every page uses the design system in §1.2. Admin page uses
-`.profile-stats` for the summary counts and `.ledger-table` for both the
-users and transactions lists, plus a new `.role-badge`/`.role-badge--admin`
-class for the role column.
+**Known minor cosmetic issue, not fixed:** `/admin`'s "User ID" table
+header wraps to two lines at normal viewport widths. Low priority.
 
-**Known minor cosmetic issue (not fixed):** on `/admin`, the "User ID"
-table header wraps to two lines and crowds the adjacent "ID" column at
-normal viewport widths. Low priority, flagged but not addressed.
+### 1.3 Investment Plans feature — STARTED, catalog only, NOT investable yet
+New since the last full handover. Read the ground rule below before
+extending this.
 
-### 1.3 Nav auth-state — NOW SERVER-RENDERED (no longer a stopgap)
-The nav previously used a client-side JS check for the `session` cookie's
-presence (see git history / AGENT.md v3 if you need the old approach).
-That broke once the cookie became `HttpOnly` (§1.6), as predicted.
+**What exists:**
+- `models.Plan` — `Name`, `AssetClass`, `Duration` (int days),
+  `RateStructure` (free-text string, e.g. "Fixed" or a raw number — **not
+  yet structured/parseable**, see caveat below), `MinDeposit`,
+  `MaxDeposit`.
+- `repository.PlanRepository` — `CreateTable`, `CreatePlan`,
+  `GetPlanByID`, `GetAllPlans`.
+- `handlers.PlansHandler` (`GET /plans`, authenticated) — lists all plans
+  for any logged-in user to browse.
+- `handlers.AdminCreatePlanHandler` (`GET`/`POST /admin/plans`,
+  admin-only) — form to create a new plan.
+- `templates/plans.html` and `templates/admin_plan.html` — both styled,
+  confirmed working end-to-end (plan created via the form shows up
+  correctly in the listing).
 
-**Current implementation:** `views.RenderTemplate` (in
-`internal/views/render.go`) now takes `r *http.Request` as its second
-argument, checks the session server-side via `auth.GetSessionEmail`, and
-exposes the result to templates as a `LoggedIn` template function (via
-`template.FuncMap`). `base.html` uses `{{if LoggedIn}} ... {{else}} ...
-{{end}}` in both the header nav and footer to show the correct links.
-No JS, no reliance on a readable cookie. The old `.nav-anon`/`.nav-authed`
-CSS classes are no longer used by `base.html` but may still exist in
-`style.css` as dead rules — harmless, but could be cleaned up next time
-that file is touched.
+**What does NOT exist yet — this is the important part:**
+- No `Investment` model. A user cannot actually put money into a plan.
+- No accrual/valuation engine. Nothing computes a "current value" for
+  anything.
+- No maturity/withdrawal-from-plan flow.
 
-**This required updating every single handler** that calls
-`RenderTemplate`, since the function signature changed (`w, "file.html",
-data` → `w, r, "file.html", data"`). All 12 handler files plus
-`render.go` were updated as part of this — see §1.6.
+**This is exactly right for where it is.** `/plans` is a read-only
+catalog right now — nobody's money is at risk, nothing fabricates a
+return. The ground rule from earlier in this project still applies and
+matters more from here on: **any feature that lets a user invest money
+and see a return must have that return traceable to something real
+(a disclosed fixed calculation or actual market data) and logged
+auditably.** Do not implement an "Investment" model or accrual engine
+that silently generates a "profit" number with no underlying source —
+flag it and discuss instead of building it quietly.
 
-**✅ VISUALLY CONFIRMED.** Human confirmed the nav correctly shows the
-logged-in state after reload, post-refactor.
-
-### 1.4 Known failure mode — verify file writes explicitly
-Earlier in this session, five template files (`profile.html`,
-`edit_profile.html`, `change_password.html`, `delete_account.html`, and
-associated CSS) were reported by the human as "no error" / working, but a
-fresh zip upload later showed they had never actually been written — the
-old unstyled versions were still in place. Root cause wasn't fully
-diagnosed (possibly a heredoc that silently failed, wrong working
-directory at that moment, or similar). No proof this can't happen again.
-**Mitigation going forward:** always ask for a `grep -c` (or similar)
-confirmation of new, distinctive content after every file write, not just
-"did the build succeed."
-
-### 1.5 Auth middleware refactor — COMPLETE and CONFIRMED
-Added `internal/middleware/auth.go` with `RequireAuth(userRepo, handler)`
-and `RequireRole(userRepo, role, handler)`, both wrapping a handler and
-attaching the resolved `*models.User` to the request context via
-`context.WithValue`. Handlers retrieve it with
-`middleware.UserFromContext(r)` instead of each repeating the cookie →
-session → user lookup.
-
-`cmd/server/main.go` now wraps every route that needs a session:
-`/dashboard`, `/deposit`, `/withdraw`, `/history`, `/profile`,
-`/transfer`, `/profile/edit`, `/delete-account`, `/change-password` all
-use `middleware.RequireAuth`. `/admin` uses `middleware.RequireRole(...,
-"admin", ...)`. Public routes (`/`, `/about`, `/contact`, `/login`,
-`/register`, `/logout`) are untouched.
-
-Every one of the 10 previously-duplicated handlers
-(`dashboard.go`, `deposit.go`, `withdraw.go`, `transfer.go`, `history.go`,
-`profile.go`, `profile_edit.go`, `delete.go`, `change_password.go`,
-`admin.go`) was rewritten to use `middleware.UserFromContext(r)` instead
-of its own cookie/session lookup. `admin.go` no longer needs
-`UserFromContext` at all, since it doesn't use the current user for
-anything — the route-level `RequireRole` wrapper handles both auth and
-the admin check before the handler runs.
-
-`delete.go` is the one exception: it still does a direct
-`r.Cookie("session")` read, but only to invalidate that specific session
-on account deletion — something the middleware doesn't do and shouldn't,
-since that's a delete-account-specific side effect, not a general auth
-concern.
-
-**Confirmed by the human**, after a full regression pass: all authenticated
-pages load correctly, deposit/withdraw/transfer still work, edit
-profile/change password still work, logged-out access to `/dashboard`
-correctly redirects to `/login`, non-admin access to `/admin` still gets
-403, and admin access to `/admin` still works. (One false alarm during
-testing — a stale session cookie from before the server restart mid-session
-caused a temporary redirect-to-login on `/admin`; resolved by re-logging
-in, not a bug in the refactor.)
-
-### 1.6 Session hardening — COMPLETE and CONFIRMED
-- `internal/auth/session.go` — replaced the exported `Sessions` map with
-  an unexported `sessions` map guarded by a `sync.Mutex` (the old version
-  had no concurrency protection at all — a real data race under
-  concurrent requests, now fixed as part of this). Sessions now carry an
-  `ExpiresAt` (24h TTL, `auth.SessionTTL`) and are lazily deleted on
-  lookup if expired. Access is via `CreateSession(email) string`,
-  `GetSessionEmail(id) (string, bool)`, `DeleteSession(id)` — nothing
-  outside the `auth` package touches the map directly anymore.
-- `internal/handlers/auth.go` — `LoginHandler` uses `auth.CreateSession`
-  and sets the cookie with `HttpOnly: true`, `Secure: true`,
-  `SameSite: http.SameSiteLaxMode`, `MaxAge` matching `SessionTTL`.
-  `LogoutHandler` uses `auth.DeleteSession` and clears the cookie with the
-  same flags.
-- `internal/handlers/delete.go` — same pattern, invalidates the session on
-  account deletion.
-- `internal/middleware/auth.go` and `internal/auth/current_user.go` —
-  updated to call `auth.GetSessionEmail` instead of the removed map.
-
-**⚠️ Important operational caveat, confirmed correct but worth
-repeating:** `Secure: true` means the cookie is **only sent over HTTPS**.
-This works fine on the dev tunnel URL (`https://opulent-eureka-...
-app.github.dev`) but will silently break login if ever run as plain
-`http://localhost` without a TLS-terminating proxy in front — the cookie
-gets set but the browser won't send it back on the next request, making
-every page look logged-out. Don't spend time debugging that as a "bug"
-if it happens — it's this flag working as intended in the wrong context.
-
-**Confirmed by the human** via DevTools: the `session` cookie shows
-HttpOnly ✓, Secure ✓, SameSite=Lax after logging in on the dev tunnel URL.
+**Before building the Investment/accrual layer**, `RateStructure` needs
+to become a real, parseable value (e.g. split into a `RateType` enum —
+`"fixed"` — and a `RateValue float64`) instead of freeform text like
+`"20"` or `"Fixed"`. A human typing an arbitrary string into that field
+right now has no defined meaning to any future code that would read it.
 
 ---
 
 ## 2. Immediate Next Task
 
-The full visual pass (§1.2), auth middleware refactor (§1.5), and session
-hardening + server-rendered nav (§1.3, §1.6) are all complete and
-confirmed. Nothing is queued/committed beyond that. Remaining candidates:
+Nothing is committed. The security/hardening punch list (§1.1) and the
+full visual pass (§1.2) are both complete. Reasonable next steps, roughly
+in order of what's needed before the next one:
 
-1. **Remove the `admin@acm.com` hardcoded backdoor** (§3) — replace with
-   a real admin-promotion flow now that `Role` exists. This is the last
-   item from the original security punch list.
-2. Minor: fix the `/admin` "User ID" header wrapping (§1.2, cosmetic).
-3. Minor: remove now-dead `.nav-anon`/`.nav-authed` CSS rules from
-   `style.css` if they're still there (§1.3).
-4. Beyond that: the actual product features (investment plans, loans,
-   etc.) — see §3 item 4 and AGENT.md v1 Phases 2–7. Nothing
-   backend-hygiene-related is blocking that work anymore.
+1. **Structure `RateStructure`** (§1.3) into something parseable, if the
+   Investment/accrual feature is going to be built next.
+2. **Design and scope the `Investment` model + accrual engine** (§1.3) —
+   this is a real design conversation, not just a coding task, because of
+   the ground rule about traceable returns. Decide fixed-rate vs.
+   market-linked before writing any code.
+3. Minor: clean up dead `.nav-anon`/`.nav-authed` CSS (§1.2).
+4. Minor: fix `/admin` "User ID" header wrapping (§1.2).
 
-Ask the human which one before starting, rather than assuming.
-
----
-
-## 3. Outstanding Items (carried forward, still valid)
-
-1. Hardcoded `admin@acm.com` admin backdoor — still the only way to get
-   admin access. **Last remaining security punch-list item.**
-2. ~~Auth middleware refactor~~ — DONE, see §1.5.
-3. ~~Session hardening~~ — DONE, see §1.6. Nav conversion also DONE, §1.3.
-4. Investment plans/portfolios, loans, market data, compliance
-   scaffolding, infra — see AGENT.md v1 Phases 2–7, none started. Ground
-   rule still applies: any feature promising a return on deposited funds
-   must be traceable to something real and logged auditably — flag rather
-   than silently build anything that fabricates "profit."
+Ask the human which one before starting.
 
 ---
 
-## 4. Handover Notes for the Next Agent
+## 3. Handover Notes for the Next Agent
 
 - Load §1.2's tokens/classes before writing any new template or CSS.
-- Re-verify actual file contents before editing — don't trust this
-  document's description of "done" over what's actually in the repo; §1.4
-  is exactly why.
+- Confirm actual file state before trusting this document, especially if
+  time has passed since it was written — see the note at the top of §1.
 - Keep the one-file-at-a-time, explicit-verification rhythm from §0.
-- Flag, don't silently build, any feature that fabricates financial
-  returns with no real backing (§3 item 4).
+- The ground rule in §1.3 is the most important thing in this document if
+  the next task touches money movement or returns. Flag, don't silently
+  build, anything that fabricates a return with no real source.

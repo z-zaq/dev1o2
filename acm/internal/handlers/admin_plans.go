@@ -27,11 +27,16 @@ func AdminCreatePlanHandler(w http.ResponseWriter, r *http.Request) {
 
 	name := strings.TrimSpace(r.FormValue("name"))
 	assetClass := strings.TrimSpace(r.FormValue("asset_class"))
-	rateStructure := strings.TrimSpace(r.FormValue("rate_structure"))
 
 	duration, err := strconv.Atoi(r.FormValue("duration"))
 	if err != nil || duration <= 0 {
 		http.Error(w, "Duration must be a positive number", http.StatusBadRequest)
+		return
+	}
+
+	rateValue, err := strconv.ParseFloat(r.FormValue("rate_value"), 64)
+	if err != nil || rateValue < 0 {
+		http.Error(w, "Rate must be a non-negative number", http.StatusBadRequest)
 		return
 	}
 
@@ -47,7 +52,7 @@ func AdminCreatePlanHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if name == "" || assetClass == "" || rateStructure == "" {
+	if name == "" || assetClass == "" {
 		http.Error(w, "All plan fields are required", http.StatusBadRequest)
 		return
 	}
@@ -58,12 +63,15 @@ func AdminCreatePlanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	plan := models.Plan{
-		Name:          name,
-		AssetClass:    assetClass,
-		Duration:      duration,
-		RateStructure: rateStructure,
-		MinDeposit:    minDeposit,
-		MaxDeposit:    maxDeposit,
+		Name:       name,
+		AssetClass: assetClass,
+		Duration:   duration,
+		// Only fixed-rate, daily-compounding plans are supported right
+		// now. See models.Plan and AGENT.md §1.3 for the formula.
+		RateType:   "fixed_compounding",
+		RateValue:  rateValue,
+		MinDeposit: minDeposit,
+		MaxDeposit: maxDeposit,
 	}
 
 	if err := PlanRepo.CreatePlan(plan); err != nil {

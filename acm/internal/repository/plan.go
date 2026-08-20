@@ -3,6 +3,7 @@ package repository
 import (
 	"acm/internal/models"
 	"database/sql"
+	"strings"
 )
 
 type PlanRepository struct {
@@ -16,13 +17,25 @@ func (r *PlanRepository) CreateTable() error {
 		name TEXT NOT NULL,
 		asset_class TEXT NOT NULL,
 		duration INTEGER NOT NULL,
-		rate_structure TEXT NOT NULL,
+		rate_type TEXT NOT NULL DEFAULT 'fixed_compounding',
+		rate_value REAL NOT NULL DEFAULT 0,
 		min_deposit REAL NOT NULL,
 		max_deposit REAL NOT NULL
 	)`
 
-	_, err := r.DB.Exec(query)
-	return err
+	if _, err := r.DB.Exec(query); err != nil {
+		return err
+	}
+
+	if _, err := r.DB.Exec(`ALTER TABLE plans ADD COLUMN rate_type TEXT NOT NULL DEFAULT 'fixed_compounding'`); err != nil && !strings.Contains(err.Error(), "duplicate column") {
+		return err
+	}
+	if _, err := r.DB.Exec(`ALTER TABLE plans ADD COLUMN rate_value REAL NOT NULL DEFAULT 0`); err != nil && !strings.Contains(err.Error(), "duplicate column") {
+		return err
+	}
+	r.DB.Exec(`UPDATE plans SET rate_value = CAST(rate_structure AS REAL) WHERE rate_value = 0`)
+
+	return nil
 }
 
 func (r *PlanRepository) CreatePlan(plan models.Plan) error {
@@ -31,18 +44,20 @@ func (r *PlanRepository) CreatePlan(plan models.Plan) error {
 		name,
 		asset_class,
 		duration,
-		rate_structure,
+		rate_type,
+		rate_value,
 		min_deposit,
 		max_deposit
 	)
-	VALUES (?, ?, ?, ?, ?, ?)`
+	VALUES (?, ?, ?, ?, ?, ?, ?)`
 
 	_, err := r.DB.Exec(
 		query,
 		plan.Name,
 		plan.AssetClass,
 		plan.Duration,
-		plan.RateStructure,
+		plan.RateType,
+		plan.RateValue,
 		plan.MinDeposit,
 		plan.MaxDeposit,
 	)
@@ -57,7 +72,8 @@ func (r *PlanRepository) GetPlanByID(planID int) (*models.Plan, error) {
 		name,
 		asset_class,
 		duration,
-		rate_structure,
+		rate_type,
+		rate_value,
 		min_deposit,
 		max_deposit
 	FROM plans
@@ -70,7 +86,8 @@ func (r *PlanRepository) GetPlanByID(planID int) (*models.Plan, error) {
 		&plan.Name,
 		&plan.AssetClass,
 		&plan.Duration,
-		&plan.RateStructure,
+		&plan.RateType,
+		&plan.RateValue,
 		&plan.MinDeposit,
 		&plan.MaxDeposit,
 	)
@@ -88,7 +105,8 @@ func (r *PlanRepository) GetAllPlans() ([]models.Plan, error) {
 		name,
 		asset_class,
 		duration,
-		rate_structure,
+		rate_type,
+		rate_value,
 		min_deposit,
 		max_deposit
 	FROM plans
@@ -110,7 +128,8 @@ func (r *PlanRepository) GetAllPlans() ([]models.Plan, error) {
 			&plan.Name,
 			&plan.AssetClass,
 			&plan.Duration,
-			&plan.RateStructure,
+			&plan.RateType,
+			&plan.RateValue,
 			&plan.MinDeposit,
 			&plan.MaxDeposit,
 		)
