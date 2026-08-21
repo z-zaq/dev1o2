@@ -281,11 +281,18 @@ a { color: inherit; }
 /* ===== Generic content pages (login/register/dashboard/etc.) ===== */
 main {
     display: block;
+    background-image: url('/static/img/bg-skyline.svg');
+    background-repeat: repeat-x;
+    background-position: bottom center;
+    background-size: 480px 168px;
 }
 main > *:not(.hero):not(.ticker):not(.ledger):not(.cta-band) {
     max-width: 640px;
     margin: 0 auto;
     padding: 48px 24px;
+}
+main > .statement--wide {
+    max-width: 960px !important;
 }
 
 /* ===== Responsive ===== */
@@ -492,6 +499,7 @@ main > .statement {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
+    white-space: nowrap;
 }
 .ledger-table th {
     text-align: left;
@@ -501,12 +509,28 @@ main > .statement {
     text-transform: uppercase;
     color: var(--slate-dark);
     border-bottom: 1px solid var(--hairline);
-    padding: 0 0 10px;
+    padding: 0 20px 10px 0;
 }
 .ledger-table td {
-    padding: 12px 0;
+    padding: 12px 20px 12px 0;
     border-bottom: 1px solid var(--hairline);
     vertical-align: top;
+}
+.ledger-table th:last-child,
+.ledger-table td:last-child {
+    padding-right: 0;
+}
+.statement__recent {
+    overflow-x: auto;
+}
+.ledger-table--dense {
+    font-size: 0.78rem;
+}
+.ledger-table--dense th {
+    padding-right: 10px;
+}
+.ledger-table--dense td {
+    padding: 9px 10px 9px 0;
 }
 .ledger-table__type {
     text-transform: capitalize;

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"acm/internal/auth"
 	"acm/internal/database"
 	"acm/internal/handlers"
 	"acm/internal/middleware"
@@ -8,6 +9,7 @@ import (
 
 	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -56,6 +58,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	auth.DB = db
+	err = auth.CreateTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	go auth.StartCleanupLoop(time.Hour)
 
 	log.Println("Database connected successfully")
 

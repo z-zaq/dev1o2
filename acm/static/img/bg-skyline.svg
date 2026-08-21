@@ -1,0 +1,8 @@
+<svg viewBox="0 0 400 140" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <path d="M0,110 L60,80 L120,95 L180,60 L240,85 L300,70 L360,100 L400,110 L400,140 L0,140 Z"
+    fill="#B8933F" opacity="0.07" />
+  <path d="M0,100 L50,120 L100,60 L150,90 L200,40 L250,75 L300,50 L350,95 L400,100 L400,140 L0,140 Z"
+    fill="#8C7333" opacity="0.10" />
+  <path d="M0,125 L40,105 L80,118 L110,85 L150,108 L190,72 L230,100 L270,65 L310,92 L350,112 L400,125 L400,140 L0,140 Z"
+    fill="#8C7333" opacity="0.16" />
+</svg>

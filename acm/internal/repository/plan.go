@@ -33,7 +33,6 @@ func (r *PlanRepository) CreateTable() error {
 	if _, err := r.DB.Exec(`ALTER TABLE plans ADD COLUMN rate_value REAL NOT NULL DEFAULT 0`); err != nil && !strings.Contains(err.Error(), "duplicate column") {
 		return err
 	}
-	r.DB.Exec(`UPDATE plans SET rate_value = CAST(rate_structure AS REAL) WHERE rate_value = 0`)
 
 	return nil
 }

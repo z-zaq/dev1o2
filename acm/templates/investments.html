@@ -1,6 +1,7 @@
 {{define "content"}}
-<section class="statement">
+<section class="statement statement--wide">
     <div class="statement__header">
+        <img src="/static/img/portfolio-banner.svg" alt="" class="statement__banner">
         <p class="statement__eyebrow">Ledger №11 — Portfolio</p>
 
         <h1 class="statement__title">My investments</h1>
@@ -17,7 +18,7 @@
         </div>
 
         {{if .}}
-        <table class="ledger-table">
+        <table class="ledger-table ledger-table--dense">
             <thead>
                 <tr>
                     <th>Plan</th>
@@ -27,8 +28,7 @@
                     <th>Profit</th>
                     <th>Rate</th>
                     <th>Progress</th>
-                    <th>Started</th>
-                    <th>Matures</th>
+                    <th>Term</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -65,11 +65,7 @@
                     </td>
 
                     <td>
-                        {{.Investment.StartedAt.Format "Jan 2, 2006"}}
-                    </td>
-
-                    <td>
-                        {{.Investment.EndsAt.Format "Jan 2, 2006"}}
+                        {{.Investment.StartedAt.Format "Jan 2"}} &rarr; {{.Investment.EndsAt.Format "Jan 2, 2006"}}
                     </td>
 
                     <td>

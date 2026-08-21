@@ -1,10 +1,21 @@
 package handlers
 
 import (
+	"acm/internal/models"
+	"acm/internal/services"
 	"acm/internal/views"
 	"net/http"
 	"strconv"
+	"time"
 )
+
+type AdminInvestmentView struct {
+	Investment models.Investment
+	Plan       *models.Plan
+	Valuation  services.InvestmentValuation
+	OwnerName  string
+	OwnerEmail string
+}
 
 func AdminHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
@@ -65,12 +76,50 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	investments, err := InvestmentRepo.GetAllInvestments()
+	if err != nil {
+		http.Error(w, "Failed to load investments", http.StatusInternalServerError)
+		return
+	}
+
+	usersByID := make(map[int]models.User, len(users))
+	for _, u := range users {
+		usersByID[u.ID] = u
+	}
+
+	investmentViews := make([]AdminInvestmentView, 0, len(investments))
+	for _, investment := range investments {
+		plan, err := PlanRepo.GetPlanByID(investment.PlanID)
+		if err != nil {
+			http.Error(w, "Failed to load investment plan", http.StatusInternalServerError)
+			return
+		}
+
+		valuation, err := services.CalculateInvestmentValue(investment, *plan, time.Now())
+		if err != nil {
+			http.Error(w, "Failed to calculate investment value", http.StatusInternalServerError)
+			return
+		}
+
+		owner := usersByID[investment.UserID]
+
+		investmentViews = append(investmentViews, AdminInvestmentView{
+			Investment: investment,
+			Plan:       plan,
+			Valuation:  valuation,
+			OwnerName:  owner.Name,
+			OwnerEmail: owner.Email,
+		})
+	}
+
 	data := struct {
 		Users        interface{}
 		Transactions interface{}
+		Investments  interface{}
 	}{
 		Users:        users,
 		Transactions: transactions,
+		Investments:  investmentViews,
 	}
 
 	views.RenderTemplate(w, r, "admin.html", data)
