@@ -1,5 +1,5 @@
-# Stage 1: Compile the Go application with compilation tools
-FROM golang:1.22-alpine AS builder
+# Stage 1: Compile the Go application using Go 1.25
+FROM golang:1.25-alpine AS builder
 
 # Install build dependencies required for your SQLite driver
 RUN apk add --no-cache gcc musl-dev
