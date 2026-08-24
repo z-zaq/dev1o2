@@ -8,6 +8,7 @@ import (
 	// "acm/internal/auth"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -54,6 +55,10 @@ func main() {
 	mux.HandleFunc("/delete-account", handlers.DeleteAccountHandler)
 	mux.HandleFunc("/change-password", handlers.ChangePasswordHandler)
 
-	log.Println("Server started on http://localhost:8080")
-	http.ListenAndServe(":8080", mux)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Println("Server started on port " + port)
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
