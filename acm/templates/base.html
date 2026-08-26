@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,11 +27,18 @@
                 </nav>
             </div>
         </header>
+=======
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <main>
-            {{template "content" .}}
-        </main>
+    <title>Avalon Capital Miner</title>
+>>>>>>> a92dbe8 (nav key)
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<<<<<<< HEAD
         <footer class="site-footer">
             <div class="site-footer__inner">
                 <div class="site-footer__brand">Avalon Capital Miner</div>
@@ -39,9 +47,90 @@
                     <a href="/contact">Contact</a>
                     <a href="/login">Log in</a>
                     <a href="/register">Register</a>
+=======
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+{{if LoggedIn}}
+
+    <div class="app-shell">
+
+        {{template "app-navigation" .}}
+
+        <div class="app-main">
+
+            <header class="app-topbar">
+                <div class="app-topbar__inner">
+                    <a href="/dashboard" class="app-topbar__brand">
+                        <span class="brand__mark">A</span>
+                        <span>Avalon Capital Miner</span>
+                    </a>
+>>>>>>> a92dbe8 (nav key)
                 </div>
-                <div class="site-footer__legal">© 2026 Avalon Capital Miner. All figures are illustrative pending live account data.</div>
+            </header>
+
+            <main>
+                {{template "content" .}}
+            </main>
+
+        </div>
+
+    </div>
+
+{{else}}
+
+    <header class="site-header">
+        <div class="site-header__inner">
+
+            <a href="/" class="brand">
+                <span class="brand__mark">A</span>
+                <span class="brand__name">Avalon&nbsp;Capital&nbsp;Miner</span>
+            </a>
+
+            <nav class="site-nav">
+                <a href="/">Home</a>
+                <a href="/about">About</a>
+                <a href="/contact">Contact</a>
+                <a href="/login">Log in</a>
+                <a href="/register" class="site-nav__cta">
+                    Open an account
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+    <main>
+        {{template "content" .}}
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+
+            <div class="site-footer__brand">
+                Avalon Capital Miner
             </div>
-        </footer>
-    </body>
+
+            <div class="site-footer__links">
+                <a href="/about">About</a>
+                <a href="/contact">Contact</a>
+                <a href="/login">Log in</a>
+                <a href="/register">Register</a>
+            </div>
+
+            <div class="site-footer__legal">
+                © 2026 Avalon Capital Miner.
+                All figures are illustrative pending live account data.
+            </div>
+
+        </div>
+    </footer>
+
+{{end}}
+
+</body>
 </html>

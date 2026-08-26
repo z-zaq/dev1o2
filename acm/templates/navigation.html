@@ -1,0 +1,105 @@
+{{define "app-navigation"}}
+<aside class="app-sidebar">
+    <div class="app-sidebar__brand">
+        <a href="/dashboard" class="app-sidebar__brand-link">
+            <span class="brand__mark">A</span>
+            <span class="app-sidebar__brand-name">Avalon Capital Miner</span>
+        </a>
+    </div>
+
+    <nav class="app-sidebar__nav" aria-label="Account navigation">
+
+        <a href="/dashboard" class="app-nav-item">
+            <span class="app-nav-item__icon">⌂</span>
+            <span class="app-nav-item__label">Dashboard</span>
+        </a>
+
+        <a href="/invest" class="app-nav-item">
+            <span class="app-nav-item__icon">↗</span>
+            <span class="app-nav-item__label">Invest</span>
+        </a>
+
+        <a href="/investments" class="app-nav-item">
+            <span class="app-nav-item__icon">▣</span>
+            <span class="app-nav-item__label">Investments</span>
+        </a>
+
+        <a href="/deposit" class="app-nav-item">
+            <span class="app-nav-item__icon">＋</span>
+            <span class="app-nav-item__label">Deposit</span>
+        </a>
+
+        <a href="/withdraw" class="app-nav-item">
+            <span class="app-nav-item__icon">↓</span>
+            <span class="app-nav-item__label">Withdraw</span>
+        </a>
+
+        <a href="/transfer" class="app-nav-item">
+            <span class="app-nav-item__icon">↔</span>
+            <span class="app-nav-item__label">Transfer</span>
+        </a>
+
+        <a href="/history" class="app-nav-item">
+            <span class="app-nav-item__icon">◷</span>
+            <span class="app-nav-item__label">History</span>
+        </a>
+
+        <a href="/plans" class="app-nav-item">
+            <span class="app-nav-item__icon">▤</span>
+            <span class="app-nav-item__label">Plans</span>
+        </a>
+
+        <div class="app-nav-divider"></div>
+
+        <a href="/profile" class="app-nav-item">
+            <span class="app-nav-item__icon">◎</span>
+            <span class="app-nav-item__label">Profile</span>
+        </a>
+
+        <a href="/profile/edit" class="app-nav-item">
+            <span class="app-nav-item__icon">✎</span>
+            <span class="app-nav-item__label">Edit profile</span>
+        </a>
+
+        <a href="/change-password" class="app-nav-item">
+            <span class="app-nav-item__icon">⌁</span>
+            <span class="app-nav-item__label">Security</span>
+        </a>
+
+        <div class="app-nav-divider"></div>
+
+        <a href="/logout" class="app-nav-item app-nav-item--logout">
+            <span class="app-nav-item__icon">↪</span>
+            <span class="app-nav-item__label">Log out</span>
+        </a>
+
+    </nav>
+</aside>
+
+<nav class="app-mobile-nav" aria-label="Mobile account navigation">
+    <a href="/dashboard" class="app-mobile-nav__item">
+        <span class="app-mobile-nav__icon">⌂</span>
+        <span>Home</span>
+    </a>
+
+    <a href="/invest" class="app-mobile-nav__item">
+        <span class="app-mobile-nav__icon">↗</span>
+        <span>Invest</span>
+    </a>
+
+    <a href="/investments" class="app-mobile-nav__item">
+        <span class="app-mobile-nav__icon">▣</span>
+        <span>Portfolio</span>
+    </a>
+
+    <a href="/deposit" class="app-mobile-nav__item">
+        <span class="app-mobile-nav__icon">＋</span>
+        <span>Deposit</span>
+    </a>
+
+    <a href="/profile" class="app-mobile-nav__item">
+        <span class="app-mobile-nav__icon">◎</span>
+        <span>Profile</span>
+    </a>
+</nav>
+{{end}}

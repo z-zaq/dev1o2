@@ -563,3 +563,339 @@ main > .statement .statement__header {
 .hero--page .hero__subtitle {
     margin-bottom: 0;
 }
+<<<<<<< HEAD
+=======
+
+/* ===== Profile stats + links ===== */
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.profile-stats__item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--parchment-dim);
+    border: 1px solid var(--hairline);
+    border-radius: 2px;
+    padding: 18px;
+    text-align: center;
+}
+.profile-stats__value {
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    color: var(--ink);
+}
+.profile-stats__label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--slate-dark);
+}
+.profile-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.action-tile--danger {
+    background: transparent;
+    border-color: rgba(166, 72, 58, 0.4);
+    color: #A6483A;
+}
+.action-tile--danger:hover {
+    background: #A6483A;
+    border-color: #A6483A;
+    color: var(--parchment);
+}
+
+/* ===== Danger zone (delete account) ===== */
+.auth__card--danger {
+    border-color: rgba(166, 72, 58, 0.5);
+}
+.auth__eyebrow--danger {
+    color: #A6483A;
+}
+.btn--danger {
+    background: #A6483A;
+    color: var(--parchment);
+}
+.btn--danger:hover {
+    background: #8A3A2F;
+}
+
+@media (max-width: 640px) {
+    .profile-stats,
+    .profile-links {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Nav auth-state toggle =====
+   Hidden by default so there's no flash of the wrong state before the
+   inline script in base.html runs; the script adds is-authed/is-anon to
+   <html> before the nav is parsed, so this resolves before paint. */
+.nav-anon, .nav-authed {
+    display: none;
+}
+html.is-anon .nav-anon {
+    display: inline-block;
+}
+html.is-authed .nav-authed {
+    display: inline-block;
+}
+
+/* ===== Admin page ===== */
+.admin__transactions {
+    margin-top: 40px;
+}
+.role-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 2px;
+    border: 1px solid var(--hairline);
+    color: var(--slate-dark);
+}
+.role-badge--admin {
+    color: var(--brass-dim);
+    border-color: var(--brass);
+    background: rgba(184, 147, 63, 0.1);
+}
+
+/* ===== Investment maturity claim (investments.html) ===== */
+.btn--small {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+.ledger-table__inline-form {
+    display: inline-block;
+    margin-top: 6px;
+}
+.ledger-table__note {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    color: var(--slate-dark);
+}
+
+
+/* =========================================================
+   APPLICATION NAVIGATION
+   ========================================================= */
+
+.app-shell {
+    min-height: 100vh;
+    display: flex;
+    background: var(--parchment);
+}
+
+.app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 250px;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--ink);
+    color: var(--parchment);
+    border-right: 1px solid var(--hairline);
+    z-index: 1000;
+}
+
+.app-sidebar__brand {
+    padding: 22px 20px;
+    border-bottom: 1px solid var(--hairline);
+}
+
+.app-sidebar__brand-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--parchment);
+    text-decoration: none;
+}
+
+.app-sidebar__brand-name {
+    font-family: var(--font-display);
+    font-size: 1rem;
+}
+
+.app-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    gap: 4px;
+}
+
+.app-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-height: 44px;
+    padding: 9px 12px;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    color: var(--slate);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.app-nav-item:hover {
+    color: var(--parchment);
+    background: var(--ink-surface);
+    border-color: var(--hairline);
+}
+
+.app-nav-item__icon {
+    width: 22px;
+    text-align: center;
+    color: var(--brass);
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.app-nav-item__label {
+    white-space: nowrap;
+}
+
+.app-nav-item--logout {
+    color: var(--slate-dark);
+}
+
+.app-nav-item--logout:hover {
+    color: var(--parchment);
+}
+
+.app-nav-divider {
+    height: 1px;
+    margin: 12px 4px;
+    background: var(--hairline);
+}
+
+.app-main {
+    width: 100%;
+    min-width: 0;
+    margin-left: 250px;
+}
+
+.app-topbar {
+    min-height: 64px;
+    background: var(--ink);
+    color: var(--parchment);
+    border-bottom: 1px solid var(--hairline);
+}
+
+.app-topbar__inner {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+}
+
+.app-topbar__brand {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    color: var(--parchment);
+    text-decoration: none;
+    font-family: var(--font-display);
+}
+
+.app-mobile-nav {
+    display: none;
+}
+
+
+/* =========================================================
+   MOBILE APPLICATION NAVIGATION
+   Persistent bottom navigation — never collapsed
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+    .app-shell {
+        display: block;
+        min-height: 100vh;
+    }
+
+    .app-sidebar {
+        display: none;
+    }
+
+    .app-main {
+        margin-left: 0;
+        padding-bottom: 78px;
+    }
+
+    .app-topbar {
+        min-height: 58px;
+    }
+
+    .app-topbar__inner {
+        min-height: 58px;
+        padding: 0 18px;
+    }
+
+    .app-topbar__brand {
+        display: flex;
+        font-size: 0.95rem;
+    }
+
+    .app-mobile-nav {
+        position: fixed;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        min-height: 68px;
+        padding: 6px 4px;
+        background: var(--ink);
+        border-top: 1px solid var(--hairline);
+        z-index: 1000;
+        box-shadow: 0 -4px 18px rgba(14, 20, 32, 0.18);
+    }
+
+    .app-mobile-nav__item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        min-width: 0;
+        color: var(--slate);
+        text-decoration: none;
+        font-size: 0.65rem;
+        line-height: 1.1;
+    }
+
+    .app-mobile-nav__item:hover {
+        color: var(--parchment);
+    }
+
+    .app-mobile-nav__icon {
+        color: var(--brass);
+        font-family: var(--font-mono);
+        font-size: 1.05rem;
+        line-height: 1;
+    }
+
+    main > *:not(.hero):not(.ticker):not(.ledger):not(.cta-band) {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+}
+>>>>>>> a92dbe8 (nav key)
